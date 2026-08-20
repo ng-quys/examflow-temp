@@ -1,0 +1,8 @@
+{
+  "name": "Trang Đăng Nhập Thi Trắc Nghiệm AI",
+  "description": "Hệ thống quản lý thi trắc nghiệm trực tuyến ExamFlow với Trang đăng nhập hiện đại và Dashboard Giảng viên hỗ trợ AI sinh câu hỏi, quản lý ngân hàng đề, ma trận kỳ thi và phân tích phổ điểm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

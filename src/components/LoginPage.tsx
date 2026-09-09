@@ -4,14 +4,15 @@ import { HeroSlider } from './HeroSlider';
 import { LoginForm } from './LoginForm';
 import { HelpCircle, Globe, GraduationCap, LayoutDashboard } from 'lucide-react';
 import { UserRole } from '../types';
+import { ROUTES } from '../constants/routes';
 
 export const LoginPage: React.FC = () => {
   const [lang, setLang] = useState<'vi' | 'en'>('vi');
   const navigate = useNavigate();
 
   const handleLoginSuccess = (role: UserRole, email: string) => {
-    // Navigate to /dashboard upon successful login
-    navigate('/dashboard');
+    // Navigate to dashboard upon successful login
+    navigate(ROUTES.DASHBOARD);
   };
 
   return (
@@ -59,7 +60,7 @@ export const LoginPage: React.FC = () => {
           {/* Quick preview button to /dashboard */}
           <button
             type="button"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate(ROUTES.DASHBOARD)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold shadow-xs transition-all cursor-pointer"
             style={{
               backgroundColor: 'var(--primary-light)',

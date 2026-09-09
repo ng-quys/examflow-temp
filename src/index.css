@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-border: var(--primary-border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+}
+
 :root,
 body.theme-1 {
   --bg-main: #F5F7FA;
@@ -7,6 +16,7 @@ body.theme-1 {
   --bg-card-subtle: #F8FAFC;
   --text-main: #0D1B2A;
   --text-muted: #475569;
+  --text-secondary: #475569;
   --text-subtle: #94A3B8;
 
   /* Brand / Left Banner Gradient */
@@ -45,6 +55,7 @@ body.theme-2 {
   --bg-card-subtle: #F8FAFC;
   --text-main: #1E293B;
   --text-muted: #64748B;
+  --text-secondary: #64748B;
   --text-subtle: #94A3B8;
 
   /* Brand / Left Banner Gradient (Soft Sky Blue #0EA5E9 -> #BAE6FD) */
@@ -83,6 +94,7 @@ body.theme-3 {
   --bg-card-subtle: #F4F4F2;
   --text-main: #1F2937;
   --text-muted: #4B5563;
+  --text-secondary: #4B5563;
   --text-subtle: #9CA3AF;
 
   /* Brand / Left Banner Gradient (Đen Charcoal / Xám Đậm #1F2937 -> #374151) */

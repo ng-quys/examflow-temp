@@ -1,154 +1,87 @@
-import React from 'react';
-import { Sparkles, FilePlus2, CalendarPlus, ArrowRight, BookOpen, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, FileSpreadsheet, Edit3 } from 'lucide-react';
 
 interface QuickActionsProps {
-  onOpenAIGenerator: () => void;
-  onCreateExam: () => void;
-  onCreateSession: () => void;
+  onRequestCreateQuestion: () => void;
+  onRequestCreateExam: () => void;
+  onNavigateToQuestionBank?: () => void;
+  onOpenAIGenerator?: () => void;
+  onOpenCreateExam?: () => void;
+  onOpenCreateSession?: () => void;
 }
 
 export const QuickActions: React.FC<QuickActionsProps> = ({
-  onOpenAIGenerator,
-  onCreateExam,
-  onCreateSession,
+  onRequestCreateQuestion,
+  onRequestCreateExam,
 }) => {
+  const [hoveredAction, setHoveredAction] = useState<'question' | 'exam' | null>(null);
+
   return (
-    <div className="app-bg-card rounded-2xl p-5 sm:p-6 border app-border shadow-xs flex flex-col justify-between h-full">
-      <div className="pb-3 border-b app-border-subtle flex items-center justify-between">
-        <div>
-          <h3 className="text-base sm:text-lg font-bold app-text-main font-['Plus_Jakarta_Sans',sans-serif] tracking-tight">
-            Thao tác nhanh
-          </h3>
-          <p className="text-xs app-text-muted mt-0.5">
-            Lối tắt hỗ trợ tạo nội dung và tổ chức thi tiện lợi
-          </p>
+    <div className="space-y-2">
+      <div className="pb-1 border-b border-slate-200">
+        <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          Thao tác nhanh
+        </h3>
+      </div>
+
+      <div className="space-y-0.5 pt-0.5">
+        {/* Action 1: + Tạo câu hỏi */}
+        <div
+          className="relative"
+          onMouseEnter={() => setHoveredAction('question')}
+          onMouseLeave={() => setHoveredAction(null)}
+        >
+          <button
+            type="button"
+            onClick={onRequestCreateQuestion}
+            className="w-full flex items-center gap-2 py-1.5 px-0 text-[13px] sm:text-[14px] font-semibold text-slate-800 hover:text-[var(--primary)] transition-colors text-left cursor-pointer group bg-transparent border-0"
+          >
+            <Plus className="w-3.5 h-3.5 text-slate-500 group-hover:text-[var(--primary)] transition-colors shrink-0" />
+            <span className="group-hover:underline underline-offset-2">Tạo câu hỏi</span>
+          </button>
+
+          {/* Hover Popover for Tạo câu hỏi */}
+          {hoveredAction === 'question' && (
+            <div className="absolute z-30 left-0 lg:left-auto lg:right-full lg:mr-3 top-full lg:top-0 w-[270px] p-3.5 sm:p-4 bg-white border border-slate-200 rounded-lg shadow-md text-slate-700 animate-in fade-in-50 duration-150 pointer-events-none">
+              <div className="text-[14px] font-semibold text-slate-900 mb-1.5 flex items-center gap-2">
+                <Edit3 className="w-4 h-4 shrink-0" style={{ color: 'var(--primary)' }} />
+                <span>Tạo câu hỏi</span>
+              </div>
+              <p className="text-[13px] text-slate-600 leading-relaxed">
+                Thêm câu hỏi thủ công hoặc sinh câu hỏi bằng AI từ nội dung bài học.
+              </p>
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="space-y-3 my-auto py-2">
-        {/* Action 1: AI tạo câu hỏi */}
-        <button
-          onClick={onOpenAIGenerator}
-          className="w-full text-left p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden"
-          style={{
-            backgroundColor: 'var(--primary-light)',
-            borderColor: 'var(--primary-border)',
-          }}
+        {/* Action 2: + Tạo kỳ thi */}
+        <div
+          className="relative"
+          onMouseEnter={() => setHoveredAction('exam')}
+          onMouseLeave={() => setHoveredAction(null)}
         >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3.5">
-              <div
-                className="w-10 h-10 rounded-xl text-white flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform"
-                style={{
-                  backgroundColor: 'var(--primary)',
-                  boxShadow: '0 4px 12px var(--primary-glow)',
-                }}
-              >
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4
-                    className="text-sm font-bold transition-colors"
-                    style={{ color: 'var(--primary)' }}
-                  >
-                    AI tạo câu hỏi
-                  </h4>
-                  <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white uppercase tracking-wider"
-                    style={{ backgroundColor: 'var(--primary)' }}
-                  >
-                    AI Fast
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Sinh câu hỏi từ tài liệu hoặc nội dung bài học tự động với độ khó tùy chỉnh.
-                </p>
-              </div>
-            </div>
-            <div
-              className="w-7 h-7 rounded-lg bg-white/90 border flex items-center justify-center group-hover:translate-x-0.5 transition-transform shrink-0 mt-1"
-              style={{
-                borderColor: 'var(--primary-border)',
-                color: 'var(--primary)',
-              }}
-            >
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        </button>
+          <button
+            type="button"
+            onClick={onRequestCreateExam}
+            className="w-full flex items-center gap-2 py-1.5 px-0 text-[13px] sm:text-[14px] font-semibold text-slate-800 hover:text-[var(--primary)] transition-colors text-left cursor-pointer group bg-transparent border-0"
+          >
+            <Plus className="w-3.5 h-3.5 text-slate-500 group-hover:text-[var(--primary)] transition-colors shrink-0" />
+            <span className="group-hover:underline underline-offset-2">Tạo kỳ thi</span>
+          </button>
 
-        {/* Action 2: Tạo đề thi */}
-        <button
-          onClick={onCreateExam}
-          className="w-full text-left p-3.5 rounded-xl app-bg-card border app-border hover:bg-slate-50 transition-all cursor-pointer group"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <div
-                className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 transition-colors"
-                style={{
-                  backgroundColor: 'var(--primary-light)',
-                  borderColor: 'var(--primary-border)',
-                  color: 'var(--primary)',
-                }}
-              >
-                <FilePlus2 className="w-4 h-4" />
+          {/* Hover Popover for Tạo kỳ thi */}
+          {hoveredAction === 'exam' && (
+            <div className="absolute z-30 left-0 lg:left-auto lg:right-full lg:mr-3 top-full lg:top-0 w-[270px] p-3.5 sm:p-4 bg-white border border-slate-200 rounded-lg shadow-md text-slate-700 animate-in fade-in-50 duration-150 pointer-events-none">
+              <div className="text-[14px] font-semibold text-slate-900 mb-1.5 flex items-center gap-2">
+                <FileSpreadsheet className="w-4 h-4 shrink-0" style={{ color: 'var(--primary)' }} />
+                <span>Tạo kỳ thi</span>
               </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold app-text-main group-hover:opacity-80 transition-opacity">
-                  Tạo đề thi
-                </h4>
-                <p className="text-[11px] sm:text-xs app-text-muted mt-0.5">
-                  Tạo đề từ ngân hàng câu hỏi hoặc ma trận đề thi.
-                </p>
-              </div>
+              <p className="text-[13px] text-slate-600 leading-relaxed">
+                Tạo đề thi mới hoặc thiết lập một ca thi từ đề đã có.
+              </p>
             </div>
-            <div
-              className="w-6 h-6 rounded-lg group-hover:translate-x-0.5 transition-all shrink-0 flex items-center justify-center"
-              style={{ color: 'var(--primary)' }}
-            >
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        </button>
-
-        {/* Action 3: Tạo ca thi */}
-        <button
-          onClick={onCreateSession}
-          className="w-full text-left p-3.5 rounded-xl app-bg-card border app-border hover:bg-slate-50 transition-all cursor-pointer group"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <div
-                className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 transition-colors"
-                style={{
-                  backgroundColor: 'var(--accent-bg-subtle)',
-                  borderColor: 'var(--accent-border)',
-                  color: 'var(--accent-text)',
-                }}
-              >
-                <CalendarPlus className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold app-text-main group-hover:opacity-80 transition-opacity">
-                  Tạo ca thi
-                </h4>
-                <p className="text-[11px] sm:text-xs app-text-muted mt-0.5">
-                  Lên lịch và cấu hình thời gian, phòng máy, mã ca thi.
-                </p>
-              </div>
-            </div>
-            <div className="w-6 h-6 rounded-lg text-slate-400 group-hover:translate-x-0.5 transition-all shrink-0 flex items-center justify-center">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        </button>
-      </div>
-
-      <div className="pt-2 text-[11px] text-slate-400 flex items-center justify-between border-t app-border-subtle">
-        <span>Gợi ý: Dùng phím tắt để thao tác nhanh</span>
-        <span className="font-semibold text-slate-500">⌘K Tìm kiếm</span>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -79,7 +79,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm đề thi, câu hỏi, sinh viên..."
-            className="w-full pl-9 pr-8 py-1.5 text-xs rounded-xl bg-slate-50 border border-slate-200/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 placeholder-slate-400 transition-all"
+            className="w-full pl-9 pr-8 py-1.5 text-xs rounded-xl bg-slate-50 border border-slate-200/80 focus:bg-white focus:outline-none focus:border-[var(--primary)] text-slate-800 placeholder-slate-400 transition-all"
           />
           {searchQuery && (
             <button
@@ -103,7 +103,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           >
             <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-white" />
+              <span
+                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 ring-white"
+                style={{ backgroundColor: 'var(--primary)' }}
+              />
             )}
           </button>
 
@@ -113,7 +116,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                   Thông báo ({unreadCount} mới)
                 </span>
-                <span className="text-[11px] text-indigo-600 cursor-pointer hover:underline font-medium">
+                <span
+                  className="text-[11px] cursor-pointer hover:underline font-semibold"
+                  style={{ color: 'var(--primary)' }}
+                >
                   Đã đọc tất cả
                 </span>
               </div>
@@ -121,17 +127,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 {NOTIFICATIONS_DATA.map((notif) => (
                   <div
                     key={notif.id}
-                    className={`p-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                      notif.read ? 'bg-slate-50/50 hover:bg-slate-50' : 'bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60'
-                    }`}
+                    className="p-2.5 rounded-xl text-xs transition-colors cursor-pointer bg-slate-50/70 hover:bg-slate-100/70 border border-slate-100"
                   >
                     <div className="flex items-start gap-2">
                       {notif.type === 'ai' ? (
-                        <div className="p-1 rounded-md bg-indigo-600 text-white shrink-0 mt-0.5">
+                        <div
+                          className="p-1 rounded-md text-white shrink-0 mt-0.5"
+                          style={{ backgroundColor: 'var(--primary)' }}
+                        >
                           <Sparkles className="w-3 h-3" />
                         </div>
                       ) : (
-                        <div className="p-1 rounded-md bg-purple-600 text-white shrink-0 mt-0.5">
+                        <div className="p-1 rounded-md bg-emerald-600 text-white shrink-0 mt-0.5">
                           <CheckCircle2 className="w-3 h-3" />
                         </div>
                       )}
@@ -179,7 +186,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               <div className="px-3 py-2 border-b border-slate-100 mb-1">
                 <p className="text-xs font-bold text-slate-900">{LECTURER_PROFILE.title}</p>
                 <p className="text-[11px] text-slate-500 truncate">{LECTURER_PROFILE.email}</p>
-                <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
+                <span
+                  className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded"
+                  style={{
+                    backgroundColor: 'var(--primary-light)',
+                    color: 'var(--primary)',
+                  }}
+                >
                   {LECTURER_PROFILE.department}
                 </span>
               </div>
@@ -197,9 +210,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                     setShowUserDropdown(false);
                     onOpenAIGenerator();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                  style={{
+                    color: 'var(--primary)',
+                    backgroundColor: 'var(--primary-light)',
+                  }}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  <Sparkles className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />
                   <span>Studio AI Sinh đề</span>
                 </button>
                 <button

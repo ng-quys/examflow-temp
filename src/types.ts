@@ -73,3 +73,47 @@ export interface PerformancePoint {
   passRate: number;
   totalExams: number;
 }
+
+export type BloomLevel = 'remember' | 'understand' | 'apply' | 'analyze';
+
+export interface CLOItem {
+  id: string;
+  code: string;
+  description: string;
+  bloomLevel: BloomLevel;
+  weightPercent: number;
+}
+
+export interface UploadedDocFile {
+  id: string;
+  name: string;
+  size: string;
+  type: 'pdf' | 'docx' | 'pptx' | 'other';
+  uploadDate: string;
+  status: 'ready' | 'processing';
+}
+
+export type WizardStepId = 1 | 2 | 3 | 4 | 5;
+
+export interface ExamWizardData {
+  // Step 1: Knowledge & CLO
+  subjectId: string;
+  semesterId: string;
+  examTitle: string;
+  examCode: string;
+  durationMinutes: number;
+  totalQuestions: number;
+  uploadedFiles: UploadedDocFile[];
+  clos: CLOItem[];
+  saveCLOToDatabase: boolean;
+  // Step 2: Matrix
+  easyCount: number;
+  mediumCount: number;
+  hardCount: number;
+  // Step 3: Questions
+  // Step 4: Customization
+  shuffleQuestions: boolean;
+  shuffleOptions: boolean;
+  antiCheatingMode: boolean;
+  scoringScale: string;
+}

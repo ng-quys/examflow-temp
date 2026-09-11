@@ -4,9 +4,8 @@ export interface ExamActivityItem {
   id: string;
   title: string;
   courseCode: string;
-  className: string;
-  studentCount: number;
-  completedCount: number;
+  examCode: string;
+  submissionCount: number;
   timeLabel: string;
   status: 'active' | 'upcoming' | 'ending-soon' | 'completed';
   statusBadge: {
@@ -25,7 +24,7 @@ export interface DashboardQuickStats {
   questions: number;
   exams: number;
   sessions: number;
-  students: number;
+  submissions: number;
 }
 
 export interface OnboardingStepData {
@@ -48,9 +47,8 @@ export const MOCK_EXAM_ACTIVITIES: ExamActivityItem[] = [
     id: 'exam-1',
     title: 'Kiểm tra giữa kỳ - Cấu trúc dữ liệu',
     courseCode: 'CS201',
-    className: 'D21CQCN01-N',
-    studentCount: 78,
-    completedCount: 65,
+    examCode: 'AI-MIDTERM-01',
+    submissionCount: 65,
     timeLabel: 'Đang diễn ra • Kết thúc sau 2 giờ',
     status: 'active',
     statusBadge: {
@@ -63,9 +61,8 @@ export const MOCK_EXAM_ACTIVITIES: ExamActivityItem[] = [
     id: 'exam-2',
     title: 'Trắc nghiệm tuần 6 - Lập trình Web',
     courseCode: 'INT310',
-    className: 'D22CQCN03-N',
-    studentCount: 62,
-    completedCount: 58,
+    examCode: 'WEB-QUIZ-02',
+    submissionCount: 58,
     timeLabel: 'Hết hạn lúc 23:59 hôm nay',
     status: 'ending-soon',
     statusBadge: {
@@ -78,9 +75,8 @@ export const MOCK_EXAM_ACTIVITIES: ExamActivityItem[] = [
     id: 'exam-3',
     title: 'Kiểm tra 15 phút - Cơ sở dữ liệu',
     courseCode: 'IT205',
-    className: 'D21CQCN02-N',
-    studentCount: 85,
-    completedCount: 85,
+    examCode: 'DB-QUIZ-15M',
+    submissionCount: 85,
     timeLabel: 'Hoàn thành hôm qua • Điểm TB: 7.8',
     status: 'completed',
     statusBadge: {
@@ -93,9 +89,8 @@ export const MOCK_EXAM_ACTIVITIES: ExamActivityItem[] = [
     id: 'exam-4',
     title: 'Thi thử kết thúc học phần - Mạng máy tính',
     courseCode: 'NET101',
-    className: 'D21CQVT01-B',
-    studentCount: 90,
-    completedCount: 0,
+    examCode: 'NET-FINAL-TEST',
+    submissionCount: 0,
     timeLabel: 'Mở vào 08:00 sáng mai',
     status: 'upcoming',
     statusBadge: {
@@ -115,7 +110,7 @@ export const MOCK_QUICK_STATS: DashboardQuickStats = {
   questions: 1248,
   exams: 32,
   sessions: 14,
-  students: 386,
+  submissions: 1842,
 };
 
 export const MOCK_ONBOARDING_STEPS: OnboardingStepData[] = [
@@ -148,7 +143,7 @@ export const MOCK_ONBOARDING_STEPS: OnboardingStepData[] = [
     id: 3,
     stepNumber: 3,
     title: 'Bước 3: Tổ chức ca thi',
-    description: 'Lên lịch ngày giờ, thời lượng làm bài và chỉ định danh sách lớp/sinh viên tham gia.',
+    description: 'Lên lịch ngày giờ, thời lượng làm bài và phát hành link/mã truy cập cho thí sinh tham gia.',
     emptyTitle: 'Chưa có ca thi nào được lên lịch',
     emptySubtitle: 'Lên lịch ca thi để cấp mã vào phòng và kích hoạt giám sát trực tuyến',
     iconName: 'calendar-clock',

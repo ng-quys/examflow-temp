@@ -2,13 +2,11 @@ export type UserRole = 'faculty' | 'student';
 
 export type DashboardNavTab =
   | 'overview'
+  | 'courses'
   | 'question-bank'
   | 'ai-generator'
   | 'exams'
   | 'exam-sessions'
-  | 'classes'
-  | 'students'
-  | 'analytics'
   | 'settings';
 
 export interface SlideData {
@@ -37,6 +35,95 @@ export interface FormErrors {
 }
 
 export type ExamStatus = 'completed' | 'upcoming' | 'ongoing';
+
+// Cognitive Levels for Blooms taxonomy
+export type BloomLevel = 'remember' | 'understand' | 'apply' | 'analyze';
+export type Bloom3Level = 'remember' | 'understand' | 'apply';
+
+// Multi-dimensional Classification: Course, Chapter, Topic
+export interface CourseTopic {
+  id: string;
+  chapterId: string;
+  code: string;
+  name: string;
+  questionCount: number;
+}
+
+export interface CourseChapter {
+  id: string;
+  courseId: string;
+  order: number;
+  code: string;
+  name: string;
+  topics: CourseTopic[];
+}
+
+export interface CourseCLO {
+  id: string;
+  courseId: string;
+  code: string;
+  description: string;
+  defaultBloom: Bloom3Level;
+  status: 'active' | 'draft';
+  notes?: string;
+}
+
+export interface Course {
+  id: string;
+  code: string;
+  name: string;
+  credits: number;
+  department: string;
+  chaptersCount: number;
+  cloCount: number;
+  questionCount: number;
+  status: 'active' | 'draft';
+  updatedAt: string;
+}
+
+// 3D Metadata Question
+export interface QuestionItem {
+  id: string;
+  courseId: string;
+  chapterId: string;
+  topicId: string;
+  cloId: string;
+  bloom: Bloom3Level;
+  content: string;
+  options: string[];
+  correctIndex: number;
+  explanation?: string;
+  status: 'approved' | 'pending' | 'rejected';
+  source: 'manual' | 'ai';
+  updatedAt: string;
+  aiSuggestedMeta?: {
+    topicName?: string;
+    cloCode?: string;
+    bloom?: Bloom3Level;
+    sourceDocumentName?: string;
+  };
+}
+
+// Matrix Exam Builder Requirements
+export interface MatrixRequirement {
+  id: string;
+  courseId: string;
+  chapterId?: string; // Optional filter to chapter
+  topicId?: string; // Optional filter to specific topic
+  cloId: string;
+  bloom: Bloom3Level;
+  quantity: number;
+  pointsPerQuestion: number;
+}
+
+export interface MatrixExamConfig {
+  title: string;
+  courseId: string;
+  code: string;
+  durationMinutes: number;
+  totalPoints: number;
+  requirements: MatrixRequirement[];
+}
 
 export interface ExamRecord {
   id: string;
@@ -73,8 +160,6 @@ export interface PerformancePoint {
   passRate: number;
   totalExams: number;
 }
-
-export type BloomLevel = 'remember' | 'understand' | 'apply' | 'analyze';
 
 export interface CLOItem {
   id: string;
@@ -117,3 +202,60 @@ export interface ExamWizardData {
   antiCheatingMode: boolean;
   scoringScale: string;
 }
+
+// ==========================================
+// AI Question Generator 5-Step Workflow Types
+// ==========================================
+export type AIWorkflowStep = 1 | 2 | 3 | 4 | 5;
+
+export type SupportedFileExtension = 'pdf' | 'docx' | 'txt';
+
+export type FileUploadState =
+  | 'idle'
+  | 'validating'
+  | 'ready'
+  | 'uploading'
+  | 'extracting'
+  | 'success'
+  | 'error';
+
+export interface SourceDocument {
+  id: string;
+  file?: File;
+  name: string;
+  size: number; // in bytes
+  sizeFormatted: string;
+  extension: SupportedFileExtension;
+  status: FileUploadState;
+  errorMessage?: string;
+  extractedText?: string;
+  wordCount?: number;
+  topicsDetected?: string[];
+  uploadedAt?: string;
+}
+
+export interface DocumentExtractionSummary {
+  documents: SourceDocument[];
+  totalWords: number;
+  totalDocuments: number;
+  summary: string;
+  keyConcepts: string[];
+}
+
+export interface AIGeneratorConfig {
+  courseId: string;
+  chapterId?: string;
+  topicId: string;
+  cloId: string;
+  bloom: Bloom3Level;
+  questionCount: number;
+  generationMode: 'single' | 'matrix';
+  matrixDistribution?: {
+    remember: number;
+    understand: number;
+    apply: number;
+  };
+  promptNotes?: string;
+  sourceDocIds: string[];
+}
+

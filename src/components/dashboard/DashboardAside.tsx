@@ -62,9 +62,9 @@ export const DashboardAside: React.FC<DashboardAsideProps> = ({
             </span>
           </div>
           <div className="h-9 flex items-center justify-between">
-            <span className="text-slate-600">Sinh viên</span>
+            <span className="text-slate-600">Lượt nộp bài</span>
             <span className="font-semibold text-slate-900">
-              {stats.students.toLocaleString()}
+              {stats.submissions.toLocaleString()}
             </span>
           </div>
         </div>

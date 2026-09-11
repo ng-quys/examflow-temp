@@ -76,7 +76,7 @@ export const Step1KnowledgeCLO: React.FC<Step1Props> = ({
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('SUBJ-01');
   const [selectedSemesterId, setSelectedSemesterId] =
     useState<string>('SEM-2026-1');
-  const [selectedClass, setSelectedClass] = useState<string>('D21CQCN01-B');
+  const [examAccessMode, setExamAccessMode] = useState<string>('link-code');
   const [examTitle, setExamTitle] = useState<string>(
     'Đề thi Giữa kỳ - Lập trình Web nâng cao (2026-2027)'
   );
@@ -278,13 +278,7 @@ export const Step1KnowledgeCLO: React.FC<Step1Props> = ({
             </label>
             <select
               value={selectedSemesterId}
-              onChange={(e) => {
-                setSelectedSemesterId(e.target.value);
-                const sem = SEMESTER_OPTIONS.find((s) => s.id === e.target.value);
-                if (sem && sem.classes.length > 0) {
-                  setSelectedClass(sem.classes[0]);
-                }
-              }}
+              onChange={(e) => setSelectedSemesterId(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white app-text-main text-sm font-medium focus:outline-none app-input-focus transition-all"
             >
               {SEMESTER_OPTIONS.map((sem) => (
@@ -298,24 +292,22 @@ export const Step1KnowledgeCLO: React.FC<Step1Props> = ({
             </p>
           </div>
 
-          {/* Chọn Lớp học phần */}
+          {/* Hình thức tham gia ca thi */}
           <div>
             <label className="block text-xs font-bold app-text-main uppercase tracking-wider mb-2">
-              Lớp học phần áp dụng <span className="text-rose-500">*</span>
+              Hình thức tham gia ca thi <span className="text-rose-500">*</span>
             </label>
             <select
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
+              value={examAccessMode}
+              onChange={(e) => setExamAccessMode(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white app-text-main text-sm font-medium focus:outline-none app-input-focus transition-all"
             >
-              {selectedSemester?.classes.map((cls) => (
-                <option key={cls} value={cls}>
-                  Lớp {cls}
-                </option>
-              ))}
+              <option value="link-code">Ca thi độc lập qua Link / Mã truy cập</option>
+              <option value="scheduled">Ca thi có lịch hẹn qua Link công khai</option>
+              <option value="proctored">Ca thi trực tuyến có mã giám sát</option>
             </select>
             <p className="text-[11px] app-text-muted mt-1">
-              Có thể gán thêm lớp ở Bước 4 (Tùy chỉnh)
+              Thí sinh tham gia bằng Link/Mã ca thi và điền Họ tên + MSSV
             </p>
           </div>
 

@@ -141,7 +141,7 @@ export const Step5Export: React.FC<Step5Props> = ({ onPrev, onFinish }) => {
               Tạo ngay Ca thi trực tuyến
             </h4>
             <p className="text-xs text-purple-800/80">
-              Lên lịch thi phòng máy hoặc thi online cho các lớp sinh viên
+              Lên lịch ca thi độc lập và phát hành mã/link truy cập cho thí sinh
             </p>
           </button>
         </div>

@@ -70,7 +70,7 @@ export const OnboardingDashboard: React.FC<OnboardingDashboardProps> = ({
         <SetupStep
           stepNumber={3}
           title="Bước 3: Tổ chức ca thi"
-          description="Lên lịch ngày giờ, thời lượng làm bài và chỉ định danh sách lớp/sinh viên tham gia."
+          description="Lên lịch ngày giờ, thời lượng làm bài và phát hành link/mã truy cập cho thí sinh tham gia."
           emptyTitle="Chưa có ca thi nào được lên lịch"
           emptySubtitle="Lên lịch ca thi để cấp mã vào phòng và kích hoạt giám sát trực tuyến"
           icon={CalendarClock}
@@ -91,7 +91,7 @@ export const OnboardingDashboard: React.FC<OnboardingDashboardProps> = ({
           icon={BarChart3}
           primaryAction={{
             label: 'Xem báo cáo mẫu',
-            onClick: onViewSampleReport || (() => onNavigateTab('analytics')),
+            onClick: onViewSampleReport || (() => onNavigateTab('overview')),
           }}
         />
       </div>

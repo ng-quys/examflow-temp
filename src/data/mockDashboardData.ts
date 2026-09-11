@@ -37,12 +37,12 @@ export const DASHBOARD_STATS: DashboardStat[] = [
     iconName: 'clock',
   },
   {
-    id: 'stat-students',
-    label: 'Sinh viên',
-    value: '386',
-    changeText: '+18 sinh viên',
+    id: 'stat-submissions',
+    label: 'Lượt nộp bài',
+    value: '1,842',
+    changeText: '+124 lượt tuần này',
     changeType: 'positive',
-    iconName: 'users',
+    iconName: 'file-text',
   },
 ];
 

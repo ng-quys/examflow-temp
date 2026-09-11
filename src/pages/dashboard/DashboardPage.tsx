@@ -5,11 +5,29 @@ import { TopHeader } from '../../components/dashboard/TopHeader';
 import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
 import { OnboardingDashboard } from '../../components/dashboard/academic/OnboardingDashboard';
 import { ActiveDashboard } from '../../components/dashboard/academic/ActiveDashboard';
+import { CourseListPage } from '../../components/dashboard/courses/CourseListPage';
+import { QuestionBankPage } from '../../components/dashboard/question-bank/QuestionBankPage';
+import { ExamMatrixBuilderPage } from '../../components/dashboard/exam/ExamMatrixBuilderPage';
+import { AIGeneratorPage } from '../../components/dashboard/ai-generator/AIGeneratorPage';
 import { AIGenerateModal } from '../../components/dashboard/AIGenerateModal';
 import { CreateExamModal } from '../../components/dashboard/CreateExamModal';
 import { ExamWizardPage } from '../../components/wizard/ExamWizardPage';
+import { ExamSessionsPage } from '../../components/dashboard/sessions/ExamSessionsPage';
+import { SettingsPage } from '../../components/dashboard/settings/SettingsPage';
 import { ROUTES } from '../../constants/routes';
-import { DashboardNavTab } from '../../types';
+import {
+  DashboardNavTab,
+  Course,
+  CourseChapter,
+  CourseCLO,
+  QuestionItem,
+} from '../../types';
+import {
+  INITIAL_COURSES,
+  INITIAL_CHAPTERS,
+  INITIAL_CLOS,
+  INITIAL_QUESTIONS,
+} from '../../data/mockAcademicData';
 
 // Dev flag to display the demo state switcher in the Dashboard Header
 const SHOW_DASHBOARD_DEMO_SWITCHER = true;
@@ -28,6 +46,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   const [isCreateExamModalOpen, setIsCreateExamModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Central Academic Multi-dimensional Data States
+  const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
+  const [chapters, setChapters] = useState<CourseChapter[]>(INITIAL_CHAPTERS);
+  const [clos, setClos] = useState<CourseCLO[]>(INITIAL_CLOS);
+  const [questions, setQuestions] = useState<QuestionItem[]>(INITIAL_QUESTIONS);
+
+  // Filters passed to Question Bank when navigating from Course Detail
+  const [qbCourseFilter, setQbCourseFilter] = useState<string | undefined>(undefined);
+  const [qbTopicFilter, setQbTopicFilter] = useState<string | undefined>(undefined);
+
+  // Toggle between Matrix Builder and Step-by-Step Wizard for Exams
+  const [examMode, setExamMode] = useState<'matrix' | 'wizard'>('matrix');
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
@@ -45,6 +76,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
 
   const handleTabChange = (tab: DashboardNavTab) => {
     setActiveTab(tab);
+    if (tab === 'question-bank') {
+      // Clear specific filters if clicked from sidebar
+      setQbCourseFilter(undefined);
+      setQbTopicFilter(undefined);
+    }
     if (tab !== 'overview' && tab !== 'exams') {
       showToast(`Đã chuyển tới phân hệ: ${tab}`);
     }
@@ -55,11 +91,37 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // If user selected 'exams' tab or clicked Create Exam, render full Exam Wizard Page
-  if (activeTab === 'exams') {
+  const handleNavigateToQuestionBankWithFilter = (courseId: string, topicId?: string) => {
+    setQbCourseFilter(courseId);
+    setQbTopicFilter(topicId);
+    setActiveTab('question-bank');
+    showToast('Đã lọc câu hỏi theo học phần được chọn');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSaveAIGeneratedQuestions = (newQuestions: QuestionItem[]) => {
+    setQuestions((prev) => [...newQuestions, ...prev]);
+
+    // Recalculate question counts for affected courses
+    const updatedCourses = courses.map((course) => {
+      const addedForCourse = newQuestions.filter((q) => q.courseId === course.id).length;
+      return addedForCourse > 0
+        ? { ...course, questionCount: course.questionCount + addedForCourse }
+        : course;
+    });
+    setCourses(updatedCourses);
+  };
+
+  const handleOpenAIGenerator = () => {
+    setActiveTab('ai-generator');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // If user is in wizard mode for exams
+  if (activeTab === 'exams' && examMode === 'wizard') {
     return (
       <ExamWizardPage
-        onBackToDashboard={() => setActiveTab('overview')}
+        onBackToDashboard={() => setExamMode('matrix')}
         onShowToast={showToast}
       />
     );
@@ -72,7 +134,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     >
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl border border-slate-800 text-xs font-semibold flex items-center gap-2">
+        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl border border-slate-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--primary)' }}></span>
           <span>{toastMessage}</span>
         </div>
@@ -85,7 +147,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
         onLogout={handleLogout}
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
-        onOpenAIGenerator={() => setIsAIModalOpen(true)}
+        onOpenAIGenerator={handleOpenAIGenerator}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
       />
@@ -101,36 +163,137 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
           activeTab={activeTab}
           onMobileMenuToggle={() => setIsMobileSidebarOpen(true)}
           onLogout={handleLogout}
-          onOpenAIGenerator={() => setIsAIModalOpen(true)}
+          onOpenAIGenerator={handleOpenAIGenerator}
         />
 
         {/* Dashboard Scrollable Body */}
         <main className="flex-1 p-4 sm:p-5 lg:p-6 max-w-6xl w-full mx-auto space-y-4">
-          {/* Main Dashboard Header */}
-          <DashboardHeader
-            title="Tổng quan"
-            subtitle="Quản lý hoạt động thi và kết quả gần đây"
-            dashboardMode={dashboardMode}
-            onModeChange={setDashboardMode}
-            showDemoSwitcher={SHOW_DASHBOARD_DEMO_SWITCHER}
-          />
+          {/* TAB 1: OVERVIEW (Tổng quan) */}
+          {activeTab === 'overview' && (
+            <>
+              {/* Main Dashboard Header with Demo Switcher */}
+              <DashboardHeader
+                title="Tổng quan"
+                subtitle="Quản lý hoạt động thi và kết quả gần đây"
+                dashboardMode={dashboardMode}
+                onModeChange={setDashboardMode}
+                showDemoSwitcher={SHOW_DASHBOARD_DEMO_SWITCHER}
+              />
 
-          {/* Conditional View: First-Use Onboarding vs Active Operational Dashboard */}
-          {dashboardMode === 'onboarding' ? (
-            <OnboardingDashboard
-              onNavigateTab={handleTabChange}
-              onOpenAIGenerator={() => setIsAIModalOpen(true)}
-              onCreateExam={handleOpenCreateExam}
-              onCreateSession={() => showToast('Mở trình tạo Ca thi mới')}
+              {/* Conditional View: First-Use Onboarding vs Active Operational Dashboard */}
+              {dashboardMode === 'onboarding' ? (
+                <OnboardingDashboard
+                  onNavigateTab={handleTabChange}
+                  onOpenAIGenerator={handleOpenAIGenerator}
+                  onCreateExam={handleOpenCreateExam}
+                  onCreateSession={() => showToast('Mở trình tạo Ca thi mới')}
+                />
+              ) : (
+                <ActiveDashboard
+                  onNavigateTab={handleTabChange}
+                  onOpenAIGenerator={handleOpenAIGenerator}
+                  onCreateExam={handleOpenCreateExam}
+                  onCreateSession={() => showToast('Mở trình tạo Ca thi mới')}
+                  onViewExamDetail={(title) => showToast(`Chi tiết kỳ thi: ${title}`)}
+                  onViewStudentDetail={(name) => showToast(`Xem bài làm của sinh viên: ${name}`)}
+                />
+              )}
+            </>
+          )}
+
+          {/* TAB 2: COURSES (Quản lý học phần) */}
+          {activeTab === 'courses' && (
+            <CourseListPage
+              courses={courses}
+              chapters={chapters}
+              clos={clos}
+              onUpdateCourses={setCourses}
+              onUpdateChapters={setChapters}
+              onUpdateCLOs={setClos}
+              onShowToast={showToast}
+              onOpenQuestionBankWithFilter={handleNavigateToQuestionBankWithFilter}
             />
-          ) : (
-            <ActiveDashboard
-              onNavigateTab={handleTabChange}
-              onOpenAIGenerator={() => setIsAIModalOpen(true)}
-              onCreateExam={handleOpenCreateExam}
-              onCreateSession={() => showToast('Mở trình tạo Ca thi mới')}
-              onViewExamDetail={(title) => showToast(`Chi tiết kỳ thi: ${title}`)}
-              onViewStudentDetail={(name) => showToast(`Xem bài làm của sinh viên: ${name}`)}
+          )}
+
+          {/* TAB 3: QUESTION BANK (Ngân hàng câu hỏi) */}
+          {activeTab === 'question-bank' && (
+            <QuestionBankPage
+              questions={questions}
+              courses={courses}
+              chapters={chapters}
+              clos={clos}
+              onUpdateQuestions={setQuestions}
+              onOpenAIGenerator={handleOpenAIGenerator}
+              onShowToast={showToast}
+              initialCourseFilter={qbCourseFilter}
+              initialTopicFilter={qbTopicFilter}
+            />
+          )}
+
+          {/* TAB 4: AI QUESTION GENERATOR (Matrix & Document Workflow) */}
+          {activeTab === 'ai-generator' && (
+            <AIGeneratorPage
+              courses={courses}
+              chapters={chapters}
+              clos={clos}
+              questions={questions}
+              onUpdateCourses={setCourses}
+              onUpdateChapters={setChapters}
+              onSaveQuestions={handleSaveAIGeneratedQuestions}
+              onNavigateToQuestionBank={() => {
+                setActiveTab('question-bank');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onShowToast={showToast}
+              onBackToDashboard={() => setActiveTab('overview')}
+            />
+          )}
+
+          {/* TAB 5: EXAM MATRIX BUILDER (Ma trận đề thi) */}
+          {activeTab === 'exams' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-1">
+                <div className="text-xs text-slate-500">
+                  Phương thức tạo đề: <strong className="text-slate-800">Ma trận chuẩn đa chiều</strong>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setExamMode('wizard')}
+                  className="text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline cursor-pointer"
+                >
+                  Chuyển sang Trình hướng dẫn 5 bước (Wizard)
+                </button>
+              </div>
+
+              <ExamMatrixBuilderPage
+                courses={courses}
+                chapters={chapters}
+                clos={clos}
+                questions={questions}
+                onShowToast={showToast}
+                onOpenAIGenerator={handleOpenAIGenerator}
+                onUpdateCourses={setCourses}
+                onUpdateChapters={setChapters}
+                onSaveGeneratedExam={(title) => {
+                  showToast(`Đã lưu đề thi "${title}" thành công!`);
+                  setActiveTab('overview');
+                }}
+              />
+            </div>
+          )}
+
+          {/* TAB 6: EXAM SESSIONS (Ca thi / Đợt kiểm tra) */}
+          {activeTab === 'exam-sessions' && (
+            <ExamSessionsPage
+              courses={courses}
+              onShowToast={showToast}
+            />
+          )}
+
+          {/* TAB 7: SETTINGS (Cài đặt) */}
+          {activeTab === 'settings' && (
+            <SettingsPage
+              onShowToast={showToast}
             />
           )}
 
@@ -169,10 +332,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
         </main>
       </div>
 
-      {/* AI Generate Modal */}
+      {/* AI Generate Modal with 3D tags support */}
       <AIGenerateModal
         isOpen={isAIModalOpen}
         onClose={() => setIsAIModalOpen(false)}
+        courses={courses}
+        chapters={chapters}
+        clos={clos}
+        onSaveQuestions={handleSaveAIGeneratedQuestions}
         onSuccessSave={(count) => {
           showToast(`Đã thêm thành công ${count} câu hỏi do AI sinh vào Ngân hàng câu hỏi!`);
         }}

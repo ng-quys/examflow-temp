@@ -1,5 +1,5 @@
-import React from 'react';
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, ArrowRight, Copy, Check, Link2 } from 'lucide-react';
 import { ExamActivityItem } from '../../data/dashboardMockData';
 import { ExamFilterType, TimeRangeType } from '../../hooks/useDashboardData';
 
@@ -30,6 +30,19 @@ export const RecentExamTable: React.FC<RecentExamTableProps> = ({
   onViewResultsTab,
   onViewAllExams,
 }) => {
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const handleCopyLink = (code: string) => {
+    const link = `${window.location.origin}/join/${code}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(link).catch(() => {});
+    }
+    setCopiedCode(code);
+    setTimeout(() => {
+      setCopiedCode(null);
+    }, 2000);
+  };
+
   return (
     <div className="space-y-4">
       {/* Section Header & Time Filter */}
@@ -39,7 +52,7 @@ export const RecentExamTable: React.FC<RecentExamTableProps> = ({
             Hoạt động thi gần đây
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Tổng hợp các bài kiểm tra và ca thi của các lớp học phần
+            Tổng hợp các bài kiểm tra và ca thi trực tuyến gần đây
           </p>
         </div>
 
@@ -133,7 +146,7 @@ export const RecentExamTable: React.FC<RecentExamTableProps> = ({
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="py-2.5 px-4">Tên đề thi & Học phần</th>
-                <th className="py-2.5 px-3">Lớp học</th>
+                <th className="py-2.5 px-3">Mã ca thi / Link</th>
                 <th className="py-2.5 px-3">Tiến độ nộp bài</th>
                 <th className="py-2.5 px-3">Thời gian</th>
                 <th className="py-2.5 px-3">Trạng thái</th>
@@ -142,11 +155,6 @@ export const RecentExamTable: React.FC<RecentExamTableProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-100">
               {exams.map((exam) => {
-                const percent =
-                  exam.studentCount > 0
-                    ? Math.round((exam.completedCount / exam.studentCount) * 100)
-                    : 0;
-
                 return (
                   <tr
                     key={exam.id}
@@ -162,24 +170,50 @@ export const RecentExamTable: React.FC<RecentExamTableProps> = ({
                         Mã học phần: {exam.courseCode}
                       </div>
                     </td>
-                    <td className="py-3 px-3 font-medium text-slate-700">
-                      {exam.className}
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center font-mono font-semibold text-xs text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 tracking-wide">
+                          {exam.examCode}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyLink(exam.examCode);
+                          }}
+                          className={`p-1 rounded transition-colors cursor-pointer ${
+                            copiedCode === exam.examCode
+                              ? 'text-emerald-700 bg-emerald-50'
+                              : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                          }`}
+                          title={`Sao chép link: /join/${exam.examCode}`}
+                          aria-label={`Sao chép link ca thi ${exam.examCode}`}
+                        >
+                          {copiedCode === exam.examCode ? (
+                            <Check className="w-3.5 h-3.5" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
                     </td>
                     <td className="py-3 px-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className="h-1.5 rounded-full"
-                            style={{
-                              width: `${percent}%`,
-                              backgroundColor: 'var(--primary)',
-                            }}
-                          />
-                        </div>
-                        <span className="text-[11px] text-slate-500 font-medium">
-                          {exam.completedCount}/{exam.studentCount}
+                      <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 text-xs">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            exam.submissionCount > 0 ? 'bg-emerald-500' : 'bg-slate-300'
+                          }`}
+                        />
+                        <span>
+                          {exam.submissionCount > 0 ? (
+                            <>
+                              Đã nộp: <strong>{exam.submissionCount}</strong> lượt
+                            </>
+                          ) : (
+                            <span className="text-slate-400">Chưa có bài nộp</span>
+                          )}
                         </span>
-                      </div>
+                      </span>
                     </td>
                     <td className="py-3 px-3 text-slate-600 text-xs">
                       {exam.timeLabel}

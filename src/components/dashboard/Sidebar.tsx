@@ -48,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const mainNavItems: NavItem[] = [
     { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
+    { id: 'courses', label: 'Quản lý học phần', icon: BookOpen },
     { id: 'question-bank', label: 'Ngân hàng câu hỏi', icon: Database },
     {
       id: 'ai-generator',
@@ -56,17 +57,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: 'AI',
       isAI: true,
     },
-    { id: 'exams', label: 'Đề thi', icon: FileSpreadsheet },
-    { id: 'exam-sessions', label: 'Ca thi', icon: CalendarClock },
-    { id: 'classes', label: 'Lớp học', icon: BookOpen },
-    { id: 'students', label: 'Sinh viên', icon: Users },
-    { id: 'analytics', label: 'Thống kê', icon: BarChart3 },
+    { id: 'exams', label: 'Ma trận đề thi', icon: FileSpreadsheet },
+    { id: 'exam-sessions', label: 'Ca thi / Đợt kiểm tra', icon: CalendarClock },
+    { id: 'settings', label: 'Cài đặt', icon: Settings },
   ];
 
-  const handleItemClick = (id: DashboardNavTab, isAI?: boolean) => {
-    if (isAI) {
-      onOpenAIGenerator();
-    }
+  const handleItemClick = (id: DashboardNavTab) => {
     onTabChange(id);
     if (onMobileClose) {
       onMobileClose();
@@ -150,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div key={item.id} className="relative group flex justify-center">
                 <button
                   type="button"
-                  onClick={() => handleItemClick(item.id, item.isAI)}
+                  onClick={() => handleItemClick(item.id)}
                   className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
                     isActive
                       ? 'font-semibold'
@@ -194,7 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => handleItemClick(item.id, true)}
+                onClick={() => handleItemClick(item.id)}
                 className={`w-full h-11 flex items-center justify-between px-3 rounded-lg text-[15px] font-medium transition-colors group cursor-pointer border ${
                   isActive
                     ? 'font-semibold shadow-2xs'
@@ -323,72 +319,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       )}
 
-      {/* Bottom Section: Settings & Logout */}
-      <div className={`p-2 border-t border-slate-100 space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
+      {/* Bottom Section: Logout */}
+      <div className={`p-2 border-t border-slate-100 ${collapsed ? 'px-2' : 'px-3'}`}>
         {collapsed ? (
-          <>
-            <div className="relative group flex justify-center">
-              <button
-                type="button"
-                onClick={() => handleItemClick('settings')}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                  activeTab === 'settings'
-                    ? 'bg-slate-100 text-slate-900 font-semibold'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-                title="Cài đặt"
-                aria-label="Cài đặt"
-              >
-                <Settings className="w-[18px] h-[18px]" />
-              </button>
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
-                <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
-                  Cài đặt
-                </div>
-              </div>
-            </div>
-
-            <div className="relative group flex justify-center">
-              <button
-                type="button"
-                onClick={onLogout}
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                title="Đăng xuất"
-                aria-label="Đăng xuất"
-              >
-                <LogOut className="w-[18px] h-[18px]" />
-              </button>
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
-                <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
-                  Đăng xuất
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => handleItemClick('settings')}
-              className={`w-full h-10 flex items-center gap-2.5 px-3 rounded-lg text-[14px] font-medium transition-colors cursor-pointer ${
-                activeTab === 'settings'
-                  ? 'bg-slate-100 text-slate-900 font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-            >
-              <Settings className="w-[18px] h-[18px] text-slate-500" />
-              <span>Cài đặt</span>
-            </button>
-
+          <div className="relative group flex justify-center">
             <button
               type="button"
               onClick={onLogout}
-              className="w-full h-10 flex items-center gap-2.5 px-3 rounded-lg text-[14px] font-medium text-rose-600 hover:bg-rose-50/80 transition-colors cursor-pointer"
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+              title="Đăng xuất"
+              aria-label="Đăng xuất"
             >
-              <LogOut className="w-[18px] h-[18px] text-rose-500" />
-              <span>Đăng xuất</span>
+              <LogOut className="w-[18px] h-[18px]" />
             </button>
-          </>
+            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
+              <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
+                Đăng xuất
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onLogout}
+            className="w-full h-10 flex items-center gap-2.5 px-3 rounded-lg text-[14px] font-medium text-rose-600 hover:bg-rose-50/80 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-[18px] h-[18px] text-rose-500" />
+            <span>Đăng xuất</span>
+          </button>
         )}
       </div>
     </div>

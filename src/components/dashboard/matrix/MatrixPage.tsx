@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft, FileText, Award } from 'lucide-react';
 import { Course, CourseChapter, CourseCLO, QuestionItem, SourceDocument } from '../../../types';
 import { MatrixKnowledgeUnit, MatrixCustomConfig } from './types';
 import {
@@ -32,6 +32,7 @@ export interface MatrixPageProps {
     units: MatrixKnowledgeUnit[];
     summary: ReturnType<typeof calculateMatrixSummary>;
     aiInstruction: string;
+    defaultScore: number;
   }) => void;
   onBackToUpload?: () => void;
   uploadedDocuments?: SourceDocument[];
@@ -99,6 +100,7 @@ export const MatrixPage: React.FC<MatrixPageProps> = ({
 
   // 3. AI Instruction & Custom Config
   const [aiInstruction, setAiInstruction] = useState<string>('');
+  const [defaultScore, setDefaultScore] = useState<number>(0.5);
   const [customConfig, setCustomConfig] = useState<MatrixCustomConfig>({
     targetTotal: 50,
     showAvailability: true,
@@ -290,14 +292,6 @@ export const MatrixPage: React.FC<MatrixPageProps> = ({
       return;
     }
 
-    // Save temporary state so AI generator can pick up
-    if (customConfig.enableDistributionControl && !isDistributionValid) {
-      onShowToast(
-        `Tổng tỉ lệ phân bổ ma trận hiện là ${totalBloomPct}%. Cần điều chỉnh đúng 100% để tạo đề.`
-      );
-      return;
-    }
-
     try {
       sessionStorage.setItem(
         'pending_exam_matrix',
@@ -307,6 +301,7 @@ export const MatrixPage: React.FC<MatrixPageProps> = ({
           units,
           summary,
           aiInstruction,
+          defaultScore,
           bloomGuidance: customConfig.bloomGuidance,
         })
       );
@@ -321,6 +316,7 @@ export const MatrixPage: React.FC<MatrixPageProps> = ({
         units,
         summary,
         aiInstruction,
+        defaultScore,
       });
       return;
     }
@@ -393,6 +389,45 @@ export const MatrixPage: React.FC<MatrixPageProps> = ({
         onChangeChapterForGroup={handleChangeChapterForGroup}
       />
 
+      {/* Thiết lập điểm số mặc định cho mỗi câu hỏi sinh ra */}
+      <div className="bg-white rounded-xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+            <Award className="w-4 h-4" />
+          </div>
+          <div>
+            <label
+              htmlFor="matrix-default-score-input"
+              className="text-xs font-bold text-slate-900 block cursor-pointer"
+            >
+              Điểm mặc định cho mỗi câu hỏi sinh ra:
+            </label>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Áp dụng giá trị này làm điểm số mặc định cho toàn bộ câu hỏi được sinh ra từ ma trận này.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          <div className="relative flex items-center">
+            <input
+              id="matrix-default-score-input"
+              type="number"
+              min={0}
+              max={10}
+              step={0.25}
+              value={defaultScore}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                setDefaultScore(isNaN(val) ? 0.5 : Math.max(0, Math.min(10, val)));
+              }}
+              className="w-24 px-3 py-1.5 text-center font-bold text-xs text-slate-900 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-300 focus:border-indigo-600 rounded-lg outline-none transition-all shadow-2xs"
+            />
+          </div>
+          <span className="text-xs font-semibold text-slate-600">điểm / câu</span>
+        </div>
+      </div>
+
       {/* 3. AI Extra Instruction Box */}
       <AIInstruction value={aiInstruction} onChange={setAiInstruction} />
 
@@ -400,9 +435,6 @@ export const MatrixPage: React.FC<MatrixPageProps> = ({
       <MatrixActions
         matrixTotal={summary.matrixTotal}
         isValid={validation.isValid}
-        enableDistributionControl={customConfig.enableDistributionControl}
-        isDistributionValid={isDistributionValid}
-        totalBloomPct={totalBloomPct}
         onSave={handleSaveMatrix}
         onPreview={() => setIsPreviewModalOpen(true)}
         onExportExcel={handleExportExcel}

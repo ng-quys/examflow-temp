@@ -10,6 +10,7 @@ interface MatrixGenerationProgressProps {
   units: MatrixKnowledgeUnit[];
   summary: MatrixSummaryStats;
   aiInstruction: string;
+  defaultScore?: number;
   courses: Course[];
   chapters: CourseChapter[];
   clos: CourseCLO[];
@@ -23,6 +24,7 @@ export const MatrixGenerationProgress: React.FC<MatrixGenerationProgressProps> =
   units,
   summary,
   aiInstruction,
+  defaultScore = 0.5,
   courses,
   chapters,
   clos,
@@ -43,7 +45,8 @@ export const MatrixGenerationProgress: React.FC<MatrixGenerationProgressProps> =
       units,
       chapters,
       clos,
-      aiInstruction
+      aiInstruction,
+      defaultScore
     );
 
     const activeUnits = units.filter((u) => u.total > 0);

@@ -12,7 +12,8 @@ export function generateQuestionsFromMatrix(
   units: MatrixKnowledgeUnit[],
   chapters: CourseChapter[],
   clos: CourseCLO[],
-  aiInstruction?: string
+  aiInstruction?: string,
+  defaultScore: number = 0.5
 ): QuestionItem[] {
   const generated: QuestionItem[] = [];
 
@@ -140,6 +141,7 @@ export function generateQuestionsFromMatrix(
         status: 'pending',
         source: 'ai',
         updatedAt: 'Vừa sinh bằng AI',
+        default_score: defaultScore,
         aiSuggestedMeta: {
           topicName: unit.name,
           cloCode,

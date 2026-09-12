@@ -4,7 +4,9 @@ export type DashboardNavTab =
   | 'overview'
   | 'courses'
   | 'question-bank'
+  | 'new-question'
   | 'ai-generator'
+  | 'quick-exam'
   | 'exams'
   | 'exam-sessions'
   | 'settings';
@@ -96,6 +98,7 @@ export interface QuestionItem {
   status: 'approved' | 'pending' | 'rejected';
   source: 'manual' | 'ai';
   updatedAt: string;
+  default_score?: number;
   aiSuggestedMeta?: {
     topicName?: string;
     cloCode?: string;

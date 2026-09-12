@@ -1,12 +1,9 @@
 import React from 'react';
-import { Save, Eye, FileSpreadsheet, Sparkles, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Save, Eye, FileSpreadsheet, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface MatrixActionsProps {
   matrixTotal: number;
   isValid: boolean;
-  enableDistributionControl?: boolean;
-  isDistributionValid?: boolean;
-  totalBloomPct?: number;
   onSave: () => void;
   onPreview: () => void;
   onExportExcel: () => void;
@@ -17,16 +14,13 @@ interface MatrixActionsProps {
 export const MatrixActions: React.FC<MatrixActionsProps> = ({
   matrixTotal,
   isValid,
-  enableDistributionControl = true,
-  isDistributionValid = true,
-  totalBloomPct = 100,
   onSave,
   onPreview,
   onExportExcel,
   onGenerateWithAI,
   onBack,
 }) => {
-  const isButtonDisabled = !isValid || matrixTotal <= 0 || (enableDistributionControl && !isDistributionValid);
+  const isButtonDisabled = !isValid || matrixTotal <= 0;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sticky bottom-4 z-30">
@@ -71,15 +65,8 @@ export const MatrixActions: React.FC<MatrixActionsProps> = ({
         </button>
       </div>
 
-      {/* Right: Primary CTA + Warning if total != 100% */}
-      <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end sm:items-center gap-2.5">
-        {enableDistributionControl && !isDistributionValid && (
-          <div className="flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1.5 rounded-lg animate-pulse">
-            <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span>Tổng tỉ lệ hiện là {totalBloomPct}% (cần đạt 100% để tiếp tục)</span>
-          </div>
-        )}
-
+      {/* Right: Primary CTA */}
+      <div className="w-full sm:w-auto flex items-center justify-end">
         <button
           type="button"
           disabled={isButtonDisabled}
@@ -88,11 +75,6 @@ export const MatrixActions: React.FC<MatrixActionsProps> = ({
           style={{
             backgroundColor: 'var(--primary)',
           }}
-          title={
-            enableDistributionControl && !isDistributionValid
-              ? `Tổng tỉ lệ phân bổ đang là ${totalBloomPct}% (yêu cầu đúng 100% để tiếp tục)`
-              : undefined
-          }
         >
           <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
           <span>Tiếp tục: Sinh câu hỏi bằng AI ({matrixTotal} câu)</span>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Database,
@@ -6,14 +6,16 @@ import {
   FileSpreadsheet,
   CalendarClock,
   BookOpen,
-  Users,
-  BarChart3,
   Settings,
   LogOut,
   GraduationCap,
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ListFilter,
+  PlusCircle,
+  Zap,
 } from 'lucide-react';
 import { DashboardNavTab } from '../../types';
 
@@ -28,12 +30,20 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
 }
 
-interface NavItem {
+interface SubMenuItem {
   id: DashboardNavTab;
   label: string;
   icon: React.ElementType;
   badge?: string;
-  isAI?: boolean;
+  badgeColor?: string;
+  tooltipDesc?: string;
+}
+
+interface MenuGroup {
+  id: string;
+  title: string;
+  icon: React.ElementType;
+  subItems: SubMenuItem[];
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,21 +56,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
-  const mainNavItems: NavItem[] = [
-    { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
-    { id: 'courses', label: 'Quản lý học phần', icon: BookOpen },
-    { id: 'question-bank', label: 'Ngân hàng câu hỏi', icon: Database },
-    {
-      id: 'ai-generator',
-      label: 'AI sinh câu hỏi',
-      icon: Sparkles,
-      badge: 'AI',
-      isAI: true,
-    },
-    { id: 'exams', label: 'Ma trận đề thi', icon: FileSpreadsheet },
-    { id: 'exam-sessions', label: 'Ca thi / Đợt kiểm tra', icon: CalendarClock },
-    { id: 'settings', label: 'Cài đặt', icon: Settings },
-  ];
+  // State to track accordion open/close for groups
+  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({
+    questionBank: true,
+    examTesting: true,
+  });
+
+  // Automatically keep parent group open if active tab belongs to it
+  useEffect(() => {
+    if (activeTab === 'question-bank' || activeTab === 'new-question' || activeTab === 'ai-generator') {
+      setOpenGroups((prev) => ({ ...prev, questionBank: true }));
+    } else if (activeTab === 'quick-exam' || activeTab === 'exams' || activeTab === 'exam-sessions') {
+      setOpenGroups((prev) => ({ ...prev, examTesting: true }));
+    }
+  }, [activeTab]);
+
+  const toggleGroup = (groupId: string) => {
+    setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
 
   const handleItemClick = (id: DashboardNavTab) => {
     onTabChange(id);
@@ -68,6 +81,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
       onMobileClose();
     }
   };
+
+  // 1. Group "Ngân hàng Câu hỏi": 2 mục con: "Danh sách câu hỏi" & "Câu hỏi mới"
+  const questionBankGroup: MenuGroup = {
+    id: 'questionBank',
+    title: 'Ngân hàng Câu hỏi',
+    icon: Database,
+    subItems: [
+      {
+        id: 'question-bank',
+        label: 'Danh sách câu hỏi',
+        icon: ListFilter,
+        tooltipDesc: 'Xem ngân hàng câu hỏi dạng thu gọn, lọc theo môn/chương/CLO/Bloom',
+      },
+      {
+        id: 'new-question',
+        label: 'Câu hỏi mới',
+        icon: PlusCircle,
+        badge: 'Mới',
+        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        tooltipDesc: 'Điều hướng trực tiếp đến màn hình chọn phương thức tạo câu hỏi',
+      },
+    ],
+  };
+
+  // 2. Group "Khảo thí & Đề thi": 3 mục con: "Tạo đề nhanh", "Quản lý đề thi", "Ca thi trực tuyến"
+  const examTestingGroup: MenuGroup = {
+    id: 'examTesting',
+    title: 'Khảo thí & Đề thi',
+    icon: FileSpreadsheet,
+    subItems: [
+      {
+        id: 'quick-exam',
+        label: 'Tạo đề nhanh',
+        icon: Zap,
+        badge: '⚡',
+        tooltipDesc: 'Tính năng tạo nhanh đề thi ngẫu nhiên bám sát ma trận hoặc số lượng câu',
+      },
+      {
+        id: 'exams',
+        label: 'Quản lý đề thi',
+        icon: FileSpreadsheet,
+        tooltipDesc: 'Danh sách đề thi, xuất file Word/PDF',
+      },
+      {
+        id: 'exam-sessions',
+        label: 'Ca thi trực tuyến',
+        icon: CalendarClock,
+        tooltipDesc: 'Tạo link ca thi cho thí sinh nhập Họ tên + MSSV',
+      },
+    ],
+  };
+
+  const isQuestionBankActive =
+    activeTab === 'question-bank' || activeTab === 'new-question' || activeTab === 'ai-generator';
+  const isExamTestingActive =
+    activeTab === 'quick-exam' || activeTab === 'exams' || activeTab === 'exam-sessions';
 
   const renderContent = (collapsed: boolean) => (
     <div className="relative flex flex-col h-full bg-white border-r border-slate-200 select-none transition-all duration-200">
@@ -88,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       )}
 
-      {/* Top Logo & App Title (Logo reduced by ~15-20%) */}
+      {/* Top Logo & App Title */}
       <div
         className={`h-14 border-b border-slate-100 flex items-center ${
           collapsed ? 'justify-center px-2' : 'justify-between px-4'
@@ -96,14 +165,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <div
-            className="w-7 h-7 rounded-lg text-white flex items-center justify-center flex-shrink-0 shadow-xs"
+            className="w-7 h-7 rounded-lg text-white flex items-center justify-center flex-shrink-0 shadow-xs cursor-pointer"
             style={{ backgroundColor: 'var(--primary)' }}
+            onClick={() => handleItemClick('overview')}
             title="ExamFlow AI"
           >
             <GraduationCap className="w-4 h-4" />
           </div>
           {!collapsed && (
-            <div className="flex items-baseline gap-1 min-w-0 truncate">
+            <div
+              className="flex items-baseline gap-1 min-w-0 truncate cursor-pointer"
+              onClick={() => handleItemClick('overview')}
+            >
               <span className="font-bold text-[17px] text-slate-900 tracking-tight font-['Plus_Jakarta_Sans',sans-serif]">
                 ExamFlow
               </span>
@@ -129,122 +202,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Navigation List */}
-      <div className={`flex-1 py-3 space-y-1 overflow-y-auto custom-scrollbar ${collapsed ? 'px-2' : 'px-3'}`}>
+      {/* Navigation Menu List */}
+      <div className={`flex-1 py-3 space-y-1.5 overflow-y-auto custom-scrollbar ${collapsed ? 'px-2' : 'px-3'}`}>
         {!collapsed && (
-          <div className="px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="px-2 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Menu Chính
           </div>
         )}
 
-        {mainNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-
-          if (collapsed) {
-            return (
-              <div key={item.id} className="relative group flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => handleItemClick(item.id)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
-                    isActive
-                      ? 'font-semibold'
-                      : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                  }`}
-                  style={
-                    isActive
-                      ? {
-                          backgroundColor: 'var(--primary-light)',
-                          color: 'var(--primary)',
-                          borderColor: 'var(--primary-border)',
-                        }
-                      : undefined
-                  }
-                  title={item.label}
-                  aria-label={item.label}
-                >
-                  <Icon className="w-[18px] h-[18px]" />
-                </button>
-
-                {/* Floating Tooltip when collapsed */}
-                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
-                  <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
-                    {item.label}
-                    {item.badge && (
-                      <span
-                        className="ml-1.5 text-[10px] text-white px-1 py-0.2 rounded font-bold"
-                        style={{ backgroundColor: 'var(--primary)' }}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          }
-
-          if (item.isAI) {
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleItemClick(item.id)}
-                className={`w-full h-11 flex items-center justify-between px-3 rounded-lg text-[15px] font-medium transition-colors group cursor-pointer border ${
-                  isActive
-                    ? 'font-semibold shadow-2xs'
-                    : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-                style={
-                  isActive
-                    ? {
-                        backgroundColor: 'var(--primary-light)',
-                        color: 'var(--primary)',
-                        borderColor: 'var(--primary-border)',
-                      }
-                    : undefined
-                }
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    className="w-7 h-7 rounded-md flex items-center justify-center transition-colors"
-                    style={
-                      isActive
-                        ? { backgroundColor: 'var(--primary)', color: '#FFFFFF' }
-                        : { backgroundColor: 'var(--primary-light)', color: 'var(--primary)' }
-                    }
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <span className="truncate">{item.label}</span>
-                </div>
-                <span
-                  className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded"
-                  style={{
-                    backgroundColor: 'var(--primary-light)',
-                    color: 'var(--primary)',
-                  }}
-                >
-                  <Sparkles className="w-2.5 h-2.5" />
-                  AI
-                </span>
-              </button>
-            );
-          }
-
-          return (
+        {/* 1. Tổng quan */}
+        {collapsed ? (
+          <div className="relative group flex justify-center">
             <button
-              key={item.id}
               type="button"
-              onClick={() => handleItemClick(item.id)}
-              className={`w-full h-11 flex items-center justify-between px-3 rounded-lg text-[15px] font-medium transition-colors group cursor-pointer border ${
-                isActive
-                  ? 'font-semibold shadow-2xs'
-                  : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+              onClick={() => handleItemClick('overview')}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                activeTab === 'overview'
+                  ? 'font-semibold'
+                  : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
               style={
-                isActive
+                activeTab === 'overview'
                   ? {
                       backgroundColor: 'var(--primary-light)',
                       color: 'var(--primary)',
@@ -252,25 +230,435 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }
                   : undefined
               }
+              title="Tổng quan"
+              aria-label="Tổng quan"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className="w-7 h-7 rounded-md flex items-center justify-center transition-colors"
-                  style={isActive ? { color: 'var(--primary)' } : undefined}
-                >
-                  <Icon className="w-[18px] h-[18px]" />
-                </div>
-                <span className="truncate">{item.label}</span>
-              </div>
-              {isActive && (
-                <div
-                  className="w-1.5 h-3.5 rounded-full"
-                  style={{ backgroundColor: 'var(--primary)' }}
-                />
-              )}
+              <LayoutDashboard className="w-[18px] h-[18px]" />
             </button>
-          );
-        })}
+            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
+              <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
+                Tổng quan
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => handleItemClick('overview')}
+            className={`w-full h-10 flex items-center justify-between px-3 rounded-lg text-[14px] font-medium transition-colors group cursor-pointer border ${
+              activeTab === 'overview'
+                ? 'font-semibold shadow-2xs'
+                : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+            style={
+              activeTab === 'overview'
+                ? {
+                    backgroundColor: 'var(--primary-light)',
+                    color: 'var(--primary)',
+                    borderColor: 'var(--primary-border)',
+                  }
+                : undefined
+            }
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors"
+                style={activeTab === 'overview' ? { color: 'var(--primary)' } : undefined}
+              >
+                <LayoutDashboard className="w-[17px] h-[17px]" />
+              </div>
+              <span className="truncate">Tổng quan</span>
+            </div>
+            {activeTab === 'overview' && (
+              <div
+                className="w-1.5 h-3.5 rounded-full"
+                style={{ backgroundColor: 'var(--primary)' }}
+              />
+            )}
+          </button>
+        )}
+
+        {/* 2. Quản lý học phần */}
+        {collapsed ? (
+          <div className="relative group flex justify-center">
+            <button
+              type="button"
+              onClick={() => handleItemClick('courses')}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                activeTab === 'courses'
+                  ? 'font-semibold'
+                  : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+              style={
+                activeTab === 'courses'
+                  ? {
+                      backgroundColor: 'var(--primary-light)',
+                      color: 'var(--primary)',
+                      borderColor: 'var(--primary-border)',
+                    }
+                  : undefined
+              }
+              title="Quản lý học phần"
+              aria-label="Quản lý học phần"
+            >
+              <BookOpen className="w-[18px] h-[18px]" />
+            </button>
+            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
+              <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
+                Quản lý học phần
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => handleItemClick('courses')}
+            className={`w-full h-10 flex items-center justify-between px-3 rounded-lg text-[14px] font-medium transition-colors group cursor-pointer border ${
+              activeTab === 'courses'
+                ? 'font-semibold shadow-2xs'
+                : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+            style={
+              activeTab === 'courses'
+                ? {
+                    backgroundColor: 'var(--primary-light)',
+                    color: 'var(--primary)',
+                    borderColor: 'var(--primary-border)',
+                  }
+                : undefined
+            }
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors"
+                style={activeTab === 'courses' ? { color: 'var(--primary)' } : undefined}
+              >
+                <BookOpen className="w-[17px] h-[17px]" />
+              </div>
+              <span className="truncate">Quản lý học phần</span>
+            </div>
+            {activeTab === 'courses' && (
+              <div
+                className="w-1.5 h-3.5 rounded-full"
+                style={{ backgroundColor: 'var(--primary)' }}
+              />
+            )}
+          </button>
+        )}
+
+        {/* Separator / Group Divider */}
+        <div className="pt-2 pb-1">
+          <div className="border-t border-slate-100" />
+        </div>
+
+        {/* 3. MỤC LỚN: "Ngân hàng Câu hỏi" (2 mục con: Danh sách câu hỏi, Câu hỏi mới) */}
+        {collapsed ? (
+          <>
+            {questionBankGroup.subItems.map((sub) => {
+              const SubIcon = sub.icon;
+              const isSubActive =
+                activeTab === sub.id || (sub.id === 'question-bank' && activeTab === 'ai-generator');
+              return (
+                <div key={sub.id} className="relative group flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => handleItemClick(sub.id)}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                      isSubActive
+                        ? 'font-semibold'
+                        : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                    style={
+                      isSubActive
+                        ? {
+                            backgroundColor: 'var(--primary-light)',
+                            color: 'var(--primary)',
+                            borderColor: 'var(--primary-border)',
+                          }
+                        : undefined
+                    }
+                    title={`Ngân hàng: ${sub.label}`}
+                    aria-label={`Ngân hàng: ${sub.label}`}
+                  >
+                    <SubIcon className="w-[18px] h-[18px]" />
+                  </button>
+                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap flex items-center gap-1.5">
+                      <span>{sub.label}</span>
+                      {sub.badge && (
+                        <span className="text-[10px] px-1 rounded font-bold bg-emerald-500 text-white">
+                          {sub.badge}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <div className="space-y-1">
+            {/* Group Header */}
+            <div
+              onClick={() => toggleGroup('questionBank')}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                isQuestionBankActive ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Database
+                  className="w-3.5 h-3.5"
+                  style={isQuestionBankActive ? { color: 'var(--primary)' } : undefined}
+                />
+                <span className="tracking-wide">Ngân hàng Câu hỏi</span>
+              </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                  openGroups.questionBank ? '' : '-rotate-90'
+                }`}
+              />
+            </div>
+
+            {/* Sub-items (2 mục con) */}
+            {openGroups.questionBank && (
+              <div className="space-y-0.5 pl-2 ml-2 border-l border-slate-200">
+                {questionBankGroup.subItems.map((sub) => {
+                  const SubIcon = sub.icon;
+                  const isSubActive =
+                    activeTab === sub.id || (sub.id === 'question-bank' && activeTab === 'ai-generator');
+
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => handleItemClick(sub.id)}
+                      className={`w-full h-9 flex items-center justify-between px-2.5 rounded-md text-[13.5px] font-medium transition-colors cursor-pointer border ${
+                        isSubActive
+                          ? 'font-semibold shadow-2xs'
+                          : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                      style={
+                        isSubActive
+                          ? {
+                              backgroundColor: 'var(--primary-light)',
+                              color: 'var(--primary)',
+                              borderColor: 'var(--primary-border)',
+                            }
+                          : undefined
+                      }
+                      title={sub.tooltipDesc}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <SubIcon
+                          className="w-4 h-4 shrink-0"
+                          style={isSubActive ? { color: 'var(--primary)' } : undefined}
+                        />
+                        <span className="truncate">{sub.label}</span>
+                      </div>
+                      {sub.badge && (
+                        <span
+                          className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${
+                            sub.badgeColor || 'bg-slate-100 text-slate-600 border-slate-200'
+                          }`}
+                        >
+                          {sub.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Separator / Group Divider */}
+        <div className="pt-2 pb-1">
+          <div className="border-t border-slate-100" />
+        </div>
+
+        {/* 4. MỤC LỚN: "Khảo thí & Đề thi" (2 mục con: Quản lý đề thi, Ca thi trực tuyến) */}
+        {collapsed ? (
+          <>
+            {examTestingGroup.subItems.map((sub) => {
+              const SubIcon = sub.icon;
+              const isSubActive = activeTab === sub.id;
+              return (
+                <div key={sub.id} className="relative group flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => handleItemClick(sub.id)}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                      isSubActive
+                        ? 'font-semibold'
+                        : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                    style={
+                      isSubActive
+                        ? {
+                            backgroundColor: 'var(--primary-light)',
+                            color: 'var(--primary)',
+                            borderColor: 'var(--primary-border)',
+                          }
+                        : undefined
+                    }
+                    title={`Khảo thí: ${sub.label}`}
+                    aria-label={`Khảo thí: ${sub.label}`}
+                  >
+                    <SubIcon className="w-[18px] h-[18px]" />
+                  </button>
+                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
+                      {sub.label}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <div className="space-y-1">
+            {/* Group Header */}
+            <div
+              onClick={() => toggleGroup('examTesting')}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                isExamTestingActive ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet
+                  className="w-3.5 h-3.5"
+                  style={isExamTestingActive ? { color: 'var(--primary)' } : undefined}
+                />
+                <span className="tracking-wide">Khảo thí & Đề thi</span>
+              </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                  openGroups.examTesting ? '' : '-rotate-90'
+                }`}
+              />
+            </div>
+
+            {/* Sub-items (2 mục con: Quản lý đề thi, Ca thi trực tuyến) */}
+            {openGroups.examTesting && (
+              <div className="space-y-0.5 pl-2 ml-2 border-l border-slate-200">
+                {examTestingGroup.subItems.map((sub) => {
+                  const SubIcon = sub.icon;
+                  const isSubActive = activeTab === sub.id;
+
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => handleItemClick(sub.id)}
+                      className={`w-full h-9 flex items-center justify-between px-2.5 rounded-md text-[13.5px] font-medium transition-colors cursor-pointer border ${
+                        isSubActive
+                          ? 'font-semibold shadow-2xs'
+                          : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                      style={
+                        isSubActive
+                          ? {
+                              backgroundColor: 'var(--primary-light)',
+                              color: 'var(--primary)',
+                              borderColor: 'var(--primary-border)',
+                            }
+                          : undefined
+                      }
+                      title={sub.tooltipDesc}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <SubIcon
+                          className="w-4 h-4 shrink-0"
+                          style={isSubActive ? { color: 'var(--primary)' } : undefined}
+                        />
+                        <span className="truncate">{sub.label}</span>
+                      </div>
+                      {sub.badge && (
+                        <span className="text-[11px] leading-none">
+                          {sub.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Separator / Group Divider */}
+        <div className="pt-2 pb-1">
+          <div className="border-t border-slate-100" />
+        </div>
+
+        {/* 5. Cài đặt */}
+        {collapsed ? (
+          <div className="relative group flex justify-center">
+            <button
+              type="button"
+              onClick={() => handleItemClick('settings')}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                activeTab === 'settings'
+                  ? 'font-semibold'
+                  : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+              style={
+                activeTab === 'settings'
+                  ? {
+                      backgroundColor: 'var(--primary-light)',
+                      color: 'var(--primary)',
+                      borderColor: 'var(--primary-border)',
+                    }
+                  : undefined
+              }
+              title="Cài đặt"
+              aria-label="Cài đặt"
+            >
+              <Settings className="w-[18px] h-[18px]" />
+            </button>
+            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
+              <div className="bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded shadow-lg whitespace-nowrap">
+                Cài đặt
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => handleItemClick('settings')}
+            className={`w-full h-10 flex items-center justify-between px-3 rounded-lg text-[14px] font-medium transition-colors group cursor-pointer border ${
+              activeTab === 'settings'
+                ? 'font-semibold shadow-2xs'
+                : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+            style={
+              activeTab === 'settings'
+                ? {
+                    backgroundColor: 'var(--primary-light)',
+                    color: 'var(--primary)',
+                    borderColor: 'var(--primary-border)',
+                  }
+                : undefined
+            }
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors"
+                style={activeTab === 'settings' ? { color: 'var(--primary)' } : undefined}
+              >
+                <Settings className="w-[17px] h-[17px]" />
+              </div>
+              <span className="truncate">Cài đặt</span>
+            </div>
+            {activeTab === 'settings' && (
+              <div
+                className="w-1.5 h-3.5 rounded-full"
+                style={{ backgroundColor: 'var(--primary)' }}
+              />
+            )}
+          </button>
+        )}
       </div>
 
       {/* AI Generator Quota Card (Compact) */}

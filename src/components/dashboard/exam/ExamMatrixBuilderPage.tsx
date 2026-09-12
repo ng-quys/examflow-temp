@@ -52,6 +52,7 @@ export const ExamMatrixBuilderPage: React.FC<ExamMatrixBuilderPageProps> = ({
   const courseQuestions = questions.filter((q) => q.courseId === selectedCourseId);
 
   // 2. Exam Configuration Settings
+  const [generationMode, setGenerationMode] = useState<'matrix' | 'random'>('matrix');
   const [examTitle, setExamTitle] = useState<string>(
     `Đề thi Kết thúc học phần - ${selectedCourse?.name || 'Trí tuệ nhân tạo'}`
   );
@@ -81,46 +82,65 @@ export const ExamMatrixBuilderPage: React.FC<ExamMatrixBuilderPageProps> = ({
   const bankHardCount = courseQuestions.filter((q) => q.bloom === 'apply').length;
 
   const isBankSufficient =
-    bankEasyCount >= targetEasy &&
-    bankMediumCount >= targetMedium &&
-    bankHardCount >= targetHard;
+    generationMode === 'random'
+      ? courseQuestions.length >= totalQuestions
+      : bankEasyCount >= targetEasy &&
+        bankMediumCount >= targetMedium &&
+        bankHardCount >= targetHard;
 
   // Handle Generate / Extract Exam
   const handleExtractExam = () => {
     // Select questions matching requirements
     const selected: QuestionItem[] = [];
 
-    const easyPool = courseQuestions.filter((q) => q.bloom === 'remember');
-    const medPool = courseQuestions.filter((q) => q.bloom === 'understand');
-    const hardPool = courseQuestions.filter((q) => q.bloom === 'apply');
-
-    // Pick easy
-    for (let i = 0; i < targetEasy; i++) {
-      if (easyPool[i]) selected.push(easyPool[i]);
-      else if (courseQuestions[i % courseQuestions.length]) {
-        selected.push(courseQuestions[i % courseQuestions.length]);
+    if (generationMode === 'random') {
+      // Rapid random selection
+      const shuffled = [...courseQuestions].sort(() => 0.5 - Math.random());
+      for (let i = 0; i < totalQuestions; i++) {
+        if (shuffled[i]) {
+          selected.push(shuffled[i]);
+        } else if (courseQuestions[i % courseQuestions.length]) {
+          selected.push(courseQuestions[i % courseQuestions.length]);
+        }
       }
-    }
+    } else {
+      // Matrix-based distribution
+      const easyPool = courseQuestions.filter((q) => q.bloom === 'remember');
+      const medPool = courseQuestions.filter((q) => q.bloom === 'understand');
+      const hardPool = courseQuestions.filter((q) => q.bloom === 'apply');
 
-    // Pick medium
-    for (let i = 0; i < targetMedium; i++) {
-      if (medPool[i]) selected.push(medPool[i]);
-      else if (courseQuestions[(i + targetEasy) % courseQuestions.length]) {
-        selected.push(courseQuestions[(i + targetEasy) % courseQuestions.length]);
+      // Pick easy
+      for (let i = 0; i < targetEasy; i++) {
+        if (easyPool[i]) selected.push(easyPool[i]);
+        else if (courseQuestions[i % courseQuestions.length]) {
+          selected.push(courseQuestions[i % courseQuestions.length]);
+        }
       }
-    }
 
-    // Pick hard
-    for (let i = 0; i < targetHard; i++) {
-      if (hardPool[i]) selected.push(hardPool[i]);
-      else if (courseQuestions[(i + targetEasy + targetMedium) % courseQuestions.length]) {
-        selected.push(courseQuestions[(i + targetEasy + targetMedium) % courseQuestions.length]);
+      // Pick medium
+      for (let i = 0; i < targetMedium; i++) {
+        if (medPool[i]) selected.push(medPool[i]);
+        else if (courseQuestions[(i + targetEasy) % courseQuestions.length]) {
+          selected.push(courseQuestions[(i + targetEasy) % courseQuestions.length]);
+        }
+      }
+
+      // Pick hard
+      for (let i = 0; i < targetHard; i++) {
+        if (hardPool[i]) selected.push(hardPool[i]);
+        else if (courseQuestions[(i + targetEasy + targetMedium) % courseQuestions.length]) {
+          selected.push(courseQuestions[(i + targetEasy + targetMedium) % courseQuestions.length]);
+        }
       }
     }
 
     setExtractedQuestions(selected);
     setIsPreviewOpen(true);
-    onShowToast(`Đã rút trích thành công ${selected.length} câu hỏi theo cấu trúc ma trận đề thi!`);
+    onShowToast(
+      generationMode === 'random'
+        ? `Đã bốc ngẫu nhiên thành công ${selected.length} câu hỏi từ ngân hàng!`
+        : `Đã rút trích thành công ${selected.length} câu hỏi theo cấu trúc ma trận đề thi!`
+    );
   };
 
   const handleSaveExam = () => {
@@ -139,31 +159,59 @@ export const ExamMatrixBuilderPage: React.FC<ExamMatrixBuilderPageProps> = ({
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
         <div>
           <h1 className="text-xl font-bold text-slate-900 font-['Plus_Jakarta_Sans',sans-serif] flex items-center gap-2">
-            <span>Ma trận đề thi & Quản lý khung đề</span>
+            <span>Tạo đề nhanh</span>
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded text-white tracking-wider uppercase shadow-2xs"
               style={{ backgroundColor: 'var(--primary)' }}
             >
-              Ra đề thi
+              Đề thi
             </span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Thiết lập cấu trúc đề thi chính thức, kiểm tra độ sẵn sàng của ngân hàng câu hỏi và rút trích tạo các mã đề hoán vị.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Tính năng tạo nhanh đề thi ngẫu nhiên bám sát ma trận Bloom hoặc số lượng câu hỏi từ ngân hàng
           </p>
         </div>
 
-        {/* Quick Link to AI Generator if bank needs more questions */}
-        <button
-          type="button"
-          onClick={onOpenAIGenerator}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors cursor-pointer self-start sm:self-auto"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Sinh thêm câu hỏi bằng AI</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Generation Mode Switcher */}
+          <div className="flex items-center p-1 bg-slate-100 rounded-lg text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setGenerationMode('matrix')}
+              className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                generationMode === 'matrix'
+                  ? 'bg-white text-indigo-700 font-bold shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🎯 Bám sát Ma trận Bloom
+            </button>
+            <button
+              type="button"
+              onClick={() => setGenerationMode('random')}
+              className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                generationMode === 'random'
+                  ? 'bg-white text-indigo-700 font-bold shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🎲 Rút ngẫu nhiên nhanh
+            </button>
+          </div>
+
+          {/* Quick Link to AI Generator if bank needs more questions */}
+          <button
+            type="button"
+            onClick={onOpenAIGenerator}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors cursor-pointer self-start sm:self-auto"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Sinh câu hỏi bằng AI</span>
+          </button>
+        </div>
       </div>
 
       {/* Target Course Selector & Global Specs */}

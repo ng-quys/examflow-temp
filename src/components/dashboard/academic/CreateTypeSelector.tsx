@@ -14,12 +14,14 @@ interface CreateTypeSelectorProps {
   type: CreateSelectorType;
   onBack: () => void;
   onSelectOption: (optionId: string) => void;
+  backLabel?: string;
 }
 
 export const CreateTypeSelector: React.FC<CreateTypeSelectorProps> = ({
   type,
   onBack,
   onSelectOption,
+  backLabel,
 }) => {
   if (type === 'exam') {
     return (
@@ -32,7 +34,7 @@ export const CreateTypeSelector: React.FC<CreateTypeSelectorProps> = ({
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Tổng quan</span>
+            <span>{backLabel || 'Quay lại Tổng quan'}</span>
           </button>
         </div>
 
@@ -72,17 +74,17 @@ export const CreateTypeSelector: React.FC<CreateTypeSelectorProps> = ({
                 </div>
               </div>
               <h3 className="text-base font-bold text-slate-900 group-hover:text-[var(--primary)] transition-colors">
-                Đề thi
+                Đề thi theo Ma trận OBE
               </h3>
               <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                Tạo đề thi từ ngân hàng câu hỏi, cấu hình số câu, mức độ và thang điểm.
+                Quy trình 4 bước tinh gọn: Cấu hình ma trận OBE, bốc câu hỏi tự động, đổi câu tương đương, hoán vị mã đề và xuất Word/PDF.
               </p>
             </div>
             <div
               className="pt-3 flex items-center text-xs font-semibold"
               style={{ color: 'var(--primary)' }}
             >
-              <span>Bắt đầu tạo đề thi</span>
+              <span>Tạo đề theo chuẩn OBE</span>
               <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
             </div>
           </div>
@@ -132,7 +134,7 @@ export const CreateTypeSelector: React.FC<CreateTypeSelectorProps> = ({
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại Tổng quan</span>
+          <span>{backLabel || 'Quay lại Tổng quan'}</span>
         </button>
       </div>
 

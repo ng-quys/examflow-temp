@@ -45,8 +45,6 @@ export const MatrixTable: React.FC<MatrixTableProps> = ({
   onDeleteChapter,
   onChangeChapterForGroup,
 }) => {
-  const [pointsMode, setPointsMode] = useState<'equal' | 'by_section'>('by_section');
-
   // Unified delete confirmation state
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({
     isOpen: false,
@@ -232,25 +230,12 @@ export const MatrixTable: React.FC<MatrixTableProps> = ({
           </tbody>
 
           {/* Table Footer with Summary Stats */}
-          <MatrixSummary
-            summary={summary}
-            bloomGuidance={bloomGuidance}
-            onUpdateBloomGuidance={onUpdateBloomGuidance}
-            enableDistributionControl={enableDistributionControl}
-            pointsMode={pointsMode}
-            onChangePointsMode={setPointsMode}
-          />
+          <MatrixSummary summary={summary} />
         </table>
       </div>
 
-      {/* Horizontal Summary Bar & Point Distribution Mode (Item 9 & Figma Image 1) */}
-      <MatrixSummaryBottomBar
-        summary={summary}
-        bloomGuidance={bloomGuidance}
-        enableDistributionControl={enableDistributionControl}
-        pointsMode={pointsMode}
-        onChangePointsMode={setPointsMode}
-      />
+      {/* Horizontal Summary Bar */}
+      <MatrixSummaryBottomBar summary={summary} />
 
       {/* Confirmation Modal for Delete Chapter, Unit, or CLO */}
       <MatrixDeleteModal

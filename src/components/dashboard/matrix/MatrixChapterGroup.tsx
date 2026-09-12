@@ -82,14 +82,14 @@ export const MatrixChapterGroup: React.FC<MatrixChapterGroupProps> = ({
             />
           </td>
 
-          {/* 3. ĐƠN VỊ KIẾN THỨC: Quick add button */}
+          {/* 3. ĐƠN VỊ KIẾN THỨC / YÊU CẦU: Quick add button */}
           <td className="px-3 py-3 align-middle border-r border-slate-200">
             {isAddingInline ? (
               <div className="flex items-center gap-1.5">
                 <input
                   type="text"
                   autoFocus
-                  placeholder="Nhập tên đơn vị kiến thức..."
+                  placeholder="Nhập tên yêu cầu cần đạt / đơn vị kiến thức..."
                   value={newUnitName}
                   onChange={(e) => setNewUnitName(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -127,20 +127,18 @@ export const MatrixChapterGroup: React.FC<MatrixChapterGroupProps> = ({
                 }}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Thêm đơn vị</span>
+                <span>+ Thêm yêu cầu</span>
               </button>
             )}
           </td>
 
-          {/* 4. CLO */}
-          <td className="px-3 py-3 align-middle border-r border-slate-200 text-slate-400 text-xs italic">
-            -- Chưa có CLO --
-          </td>
+          {/* 4. CLO: Empty cell */}
+          <td className="px-3 py-3 align-middle border-r border-slate-200"></td>
 
-          {/* 5, 6, 7. BLOOM */}
-          <td className="px-2 py-3 text-center border-r border-slate-200 text-slate-400 text-xs">—</td>
-          <td className="px-2 py-3 text-center border-r border-slate-200 text-slate-400 text-xs">—</td>
-          <td className="px-2 py-3 text-center text-slate-400 text-xs">—</td>
+          {/* 5, 6, 7. BLOOM: Empty cells */}
+          <td className="px-2 py-3 border-r border-slate-200"></td>
+          <td className="px-2 py-3 border-r border-slate-200"></td>
+          <td className="px-2 py-3"></td>
         </tr>
       ) : (
         // Case with 1 or more units
@@ -195,18 +193,18 @@ export const MatrixChapterGroup: React.FC<MatrixChapterGroupProps> = ({
             );
           })}
 
-          {/* Bottom row of this chapter: "+ Thêm đơn vị" dashed button row */}
+          {/* Bottom row of this chapter: "+ Thêm yêu cầu" dashed button row */}
           <tr className="border-b-2 border-slate-300 bg-white/40">
             {/* Columns 1 & 2 are spanned by the first row */}
 
-            {/* Column 3: "+ Thêm đơn vị" button */}
+            {/* Column 3: "+ Thêm yêu cầu" button */}
             <td className="px-3 py-2 align-middle border-r border-slate-200">
               {isAddingInline ? (
                 <div className="flex items-center gap-1.5">
                   <input
                     type="text"
                     autoFocus
-                    placeholder="Nhập tên đơn vị kiến thức..."
+                    placeholder="Nhập tên yêu cầu cần đạt / đơn vị kiến thức..."
                     value={newUnitName}
                     onChange={(e) => setNewUnitName(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -244,26 +242,18 @@ export const MatrixChapterGroup: React.FC<MatrixChapterGroupProps> = ({
                   }}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>+ Thêm đơn vị</span>
+                  <span>+ Thêm yêu cầu</span>
                 </button>
               )}
             </td>
 
-            {/* Column 4: "+ Thêm yêu cầu" (CLO) dashed placeholder matching Figma Image 1 */}
-            <td className="px-3 py-2 align-middle border-r border-slate-200">
-              <div className="w-full py-1.5 px-3 border border-dashed border-slate-200 rounded-xl text-xs text-slate-400 flex items-center justify-center gap-1">
-                <span>+ Thêm yêu cầu</span>
-              </div>
-            </td>
+            {/* Column 4: Blank placeholder for CLO */}
+            <td className="px-3 py-2 align-middle border-r border-slate-200"></td>
 
-            {/* Columns 5, 6, 7: Blank bloom placeholders */}
-            <td className="px-2 py-2 border-r border-slate-200 text-center text-xs text-slate-300">
-              0
-            </td>
-            <td className="px-2 py-2 border-r border-slate-200 text-center text-xs text-slate-300">
-              0
-            </td>
-            <td className="px-2 py-2 text-center text-xs text-slate-300">0</td>
+            {/* Columns 5, 6, 7: Blank bloom placeholders (completely empty) */}
+            <td className="px-2 py-2 border-r border-slate-200"></td>
+            <td className="px-2 py-2 border-r border-slate-200"></td>
+            <td className="px-2 py-2"></td>
           </tr>
         </>
       )}

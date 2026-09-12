@@ -7,7 +7,9 @@ import { OnboardingDashboard } from '../../components/dashboard/academic/Onboard
 import { ActiveDashboard } from '../../components/dashboard/academic/ActiveDashboard';
 import { CourseListPage } from '../../components/dashboard/courses/CourseListPage';
 import { QuestionBankPage } from '../../components/dashboard/question-bank/QuestionBankPage';
-import { ExamMatrixBuilderPage } from '../../components/dashboard/exam/ExamMatrixBuilderPage';
+import { QuestionFormModal } from '../../components/dashboard/question-bank/QuestionFormModal';
+import { CreateTypeSelector } from '../../components/dashboard/academic/CreateTypeSelector';
+import { ExamManagementPage } from '../../components/dashboard/exam/ExamManagementPage';
 import { AIGeneratorPage } from '../../components/dashboard/ai-generator/AIGeneratorPage';
 import { AIGenerateModal } from '../../components/dashboard/AIGenerateModal';
 import { CreateExamModal } from '../../components/dashboard/CreateExamModal';
@@ -44,6 +46,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isCreateExamModalOpen, setIsCreateExamModalOpen] = useState(false);
+  const [isManualQuestionModalOpen, setIsManualQuestionModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Central Academic Multi-dimensional Data States
@@ -215,7 +218,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
             />
           )}
 
-          {/* TAB 3: QUESTION BANK (Ngân hàng câu hỏi) */}
+          {/* TAB 3: QUESTION BANK (Ngân hàng câu hỏi - Danh sách câu hỏi) */}
           {activeTab === 'question-bank' && (
             <QuestionBankPage
               questions={questions}
@@ -230,7 +233,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
             />
           )}
 
-          {/* TAB 4: AI QUESTION GENERATOR (Matrix & Document Workflow) */}
+          {/* TAB 3.1: NEW QUESTION METHOD SELECTOR (Câu hỏi mới - Tái sử dụng màn hình chọn cách tạo) */}
+          {activeTab === 'new-question' && (
+            <div className="py-2">
+              <CreateTypeSelector
+                type="question"
+                backLabel="Quay lại Danh sách câu hỏi"
+                onBack={() => setActiveTab('question-bank')}
+                onSelectOption={(optionId) => {
+                  if (optionId === 'manual-question') {
+                    setIsManualQuestionModalOpen(true);
+                  } else if (optionId === 'ai-question') {
+                    setActiveTab('ai-generator');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {/* TAB 4: AI QUESTION GENERATOR (Matrix & Document Workflow - 4 bước sinh câu hỏi) */}
           {activeTab === 'ai-generator' && (
             <AIGeneratorPage
               courses={courses}
@@ -249,37 +271,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
             />
           )}
 
-          {/* TAB 5: EXAM MATRIX BUILDER (Ma trận đề thi) */}
-          {activeTab === 'exams' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-1">
-                <div className="text-xs text-slate-500">
-                  Phương thức tạo đề: <strong className="text-slate-800">Ma trận chuẩn đa chiều</strong>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setExamMode('wizard')}
-                  className="text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline cursor-pointer"
-                >
-                  Chuyển sang Trình hướng dẫn 5 bước (Wizard)
-                </button>
-              </div>
-
-              <ExamMatrixBuilderPage
-                courses={courses}
-                chapters={chapters}
-                clos={clos}
-                questions={questions}
-                onShowToast={showToast}
-                onOpenAIGenerator={handleOpenAIGenerator}
-                onUpdateCourses={setCourses}
-                onUpdateChapters={setChapters}
-                onSaveGeneratedExam={(title) => {
-                  showToast(`Đã lưu đề thi "${title}" thành công!`);
-                  setActiveTab('overview');
-                }}
-              />
-            </div>
+          {/* TAB 5: EXAMS MANAGEMENT (Quản lý đề thi & Tạo đề thi chuẩn Ma trận OBE 4 bước) */}
+          {(activeTab === 'exams' || activeTab === 'quick-exam') && (
+            <ExamManagementPage
+              courses={courses}
+              chapters={chapters}
+              clos={clos}
+              questions={questions}
+              onUpdateQuestions={setQuestions}
+              onNavigateToWizard={() => setExamMode('wizard')}
+              onCreateSessionFromExam={(examTitle) => {
+                showToast(`Đã chọn đề "${examTitle}" để mở ca thi`);
+                setActiveTab('exam-sessions');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onShowToast={showToast}
+            />
           )}
 
           {/* TAB 6: EXAM SESSIONS (Ca thi / Đợt kiểm tra) */}
@@ -353,6 +360,31 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
           showToast(`Đã tạo thành công đề thi: ${title}`);
         }}
       />
+
+      {/* Manual Question Creation Modal triggered from 'new-question' screen */}
+      {isManualQuestionModalOpen && (
+        <QuestionFormModal
+          isOpen={isManualQuestionModalOpen}
+          courses={courses}
+          chapters={chapters}
+          clos={clos}
+          onClose={() => setIsManualQuestionModalOpen(false)}
+          onSave={(newQuestion) => {
+            setQuestions((prev) => [newQuestion, ...prev]);
+            setCourses((prev) =>
+              prev.map((c) =>
+                c.id === newQuestion.courseId
+                  ? { ...c, questionCount: c.questionCount + 1 }
+                  : c
+              )
+            );
+            setIsManualQuestionModalOpen(false);
+            showToast('Đã thêm câu hỏi thủ công vào ngân hàng thành công!');
+            setActiveTab('question-bank');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      )}
     </div>
   );
 };

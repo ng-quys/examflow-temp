@@ -196,6 +196,16 @@ export const QuestionReviewStep: React.FC<QuestionReviewStepProps> = ({
                       </span>
                     </span>
                   )}
+
+                  {/* Default Score Badge */}
+                  {q.default_score !== undefined && (
+                    <span
+                      className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200/80"
+                      title="Điểm số mặc định của câu hỏi"
+                    >
+                      {q.default_score} điểm
+                    </span>
+                  )}
                 </div>
 
                 {/* Right Actions */}

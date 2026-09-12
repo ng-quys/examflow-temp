@@ -24,10 +24,12 @@ interface TopHeaderProps {
 const TAB_TITLES: Record<DashboardNavTab, string> = {
   overview: 'Tổng quan',
   courses: 'Quản lý học phần',
-  'question-bank': 'Ngân hàng câu hỏi',
+  'question-bank': 'Danh sách câu hỏi',
+  'new-question': 'Tạo câu hỏi mới',
   'ai-generator': 'AI sinh câu hỏi',
-  exams: 'Ma trận đề thi',
-  'exam-sessions': 'Ca thi / Đợt kiểm tra',
+  'quick-exam': 'Tạo đề nhanh',
+  exams: 'Quản lý đề thi',
+  'exam-sessions': 'Ca thi trực tuyến',
   settings: 'Cài đặt',
 };
 

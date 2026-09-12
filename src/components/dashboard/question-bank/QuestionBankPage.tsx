@@ -26,6 +26,7 @@ import {
 } from '../../../types';
 import { BLOOM_3_CONFIG } from '../../../data/mockAcademicData';
 import { QuestionFormModal } from './QuestionFormModal';
+import { QuestionBankCard } from './QuestionBankCard';
 
 interface QuestionBankPageProps {
   questions: QuestionItem[];
@@ -396,172 +397,32 @@ export const QuestionBankPage: React.FC<QuestionBankPageProps> = ({
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {filteredQuestions.map((q, idx) => {
             const course = courses.find((c) => c.id === q.courseId);
+            const chapter = chapters.find(
+              (ch) => ch.topics.some((t) => t.id === q.topicId) || ch.courseId === q.courseId
+            );
             const topic = chapters
               .flatMap((ch) => ch.topics)
               .find((t) => t.id === q.topicId);
             const clo = clos.find((c) => c.id === q.cloId);
-            const bloomCfg = BLOOM_3_CONFIG[q.bloom];
-
-            const isPending = q.status === 'pending';
 
             return (
-              <div
+              <QuestionBankCard
                 key={q.id}
-                className={`bg-white rounded-xl border p-4 sm:p-5 shadow-2xs space-y-3 transition-all ${
-                  isPending ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200/90'
-                }`}
-              >
-                {/* Top: 3 Metadata Badges + Status + Date + Actions */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {/* Badge 1: Chủ đề kiến thức */}
-                    <span
-                      className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
-                      title={`Học phần: ${course?.name || ''}`}
-                    >
-                      {topic ? `${topic.code} ${topic.name}` : 'Chủ đề'}
-                    </span>
-
-                    {/* Badge 2: Chuẩn đầu ra CLO */}
-                    <span
-                      className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold border"
-                      style={{
-                        backgroundColor: 'var(--primary-light)',
-                        color: 'var(--primary)',
-                        borderColor: 'var(--primary-border)',
-                      }}
-                      title={clo?.description}
-                    >
-                      {clo ? clo.code : 'CLO'}
-                    </span>
-
-                    {/* Badge 3: Mức độ nhận thức Bloom */}
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${bloomCfg.bgClass} ${bloomCfg.textClass} ${bloomCfg.borderClass}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${bloomCfg.dotClass}`} />
-                      <span>{bloomCfg.label}</span>
-                    </span>
-
-                    {/* Source: AI or Manual */}
-                    {q.source === 'ai' ? (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-0.5">
-                        <Sparkles className="w-2.5 h-2.5" />
-                        AI sinh
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-slate-400">Thủ công</span>
-                    )}
-
-                    {/* Status badge */}
-                    {isPending ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                        Chờ duyệt
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-0.5">
-                        <Check className="w-2.5 h-2.5" /> Đã duyệt
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 self-end sm:self-auto">
-                    <span className="text-[11px] text-slate-400">
-                      Cập nhật: {q.updatedAt}
-                    </span>
-
-                    {/* Quick Approve / Reject for Pending questions */}
-                    {isPending && (
-                      <div className="flex items-center gap-1 pl-1 border-l border-slate-200">
-                        <button
-                          type="button"
-                          onClick={() => handleApproveQuestion(q.id)}
-                          className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs cursor-pointer"
-                          title="Duyệt câu hỏi này vào ngân hàng chính thức"
-                        >
-                          <Check className="w-3 h-3" />
-                          <span>Duyệt</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRejectQuestion(q.id)}
-                          className="px-2 py-1 rounded border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-semibold cursor-pointer"
-                          title="Từ chối câu hỏi AI"
-                        >
-                          Từ chối
-                        </button>
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQuestionToEdit(q);
-                        setIsFormModalOpen(true);
-                      }}
-                      className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                      title="Chỉnh sửa câu hỏi"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteQuestion(q.id)}
-                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                      title="Xóa câu hỏi"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Question Content */}
-                <div className="text-xs font-semibold text-slate-900 leading-relaxed">
-                  <span className="font-bold text-slate-500 mr-2">Câu {idx + 1}.</span>
-                  {q.content}
-                </div>
-
-                {/* 4 Options Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
-                  {q.options.map((opt, oIdx) => {
-                    const isCorrect = oIdx === q.correctIndex;
-                    return (
-                      <div
-                        key={oIdx}
-                        className={`p-2.5 rounded-lg border text-xs leading-snug flex items-start gap-2 ${
-                          isCorrect
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold'
-                            : 'bg-slate-50/70 border-slate-200/80 text-slate-700'
-                        }`}
-                      >
-                        <span
-                          className={`w-4 h-4 rounded text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
-                            isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
-                          }`}
-                        >
-                          {String.fromCharCode(65 + oIdx)}
-                        </span>
-                        <span className="flex-1">{opt}</span>
-                        {isCorrect && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Explanation */}
-                {q.explanation && (
-                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex items-start gap-1.5">
-                    <span className="font-bold text-slate-700 shrink-0">💡 Giải thích:</span>
-                    <span>{q.explanation}</span>
-                  </div>
-                )}
-              </div>
+                question={q}
+                index={idx}
+                course={course}
+                chapter={chapter}
+                topicName={topic ? `${topic.code} ${topic.name}` : undefined}
+                clo={clo}
+                onSave={handleSaveQuestion}
+                onDelete={handleDeleteQuestion}
+                onApprove={handleApproveQuestion}
+                onReject={handleRejectQuestion}
+                onShowToast={onShowToast}
+              />
             );
           })}
         </div>

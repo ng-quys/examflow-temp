@@ -61,6 +61,7 @@ export const AIGeneratorPage: React.FC<AIGeneratorPageProps> = ({
     units: MatrixKnowledgeUnit[];
     summary: MatrixSummaryStats;
     aiInstruction: string;
+    defaultScore?: number;
   } | null>(null);
 
   // Generated Questions State
@@ -84,6 +85,7 @@ export const AIGeneratorPage: React.FC<AIGeneratorPageProps> = ({
     units: MatrixKnowledgeUnit[];
     summary: MatrixSummaryStats;
     aiInstruction: string;
+    defaultScore?: number;
   }) => {
     setActiveMatrixData(data);
     setCurrentStep(3);
@@ -236,6 +238,7 @@ export const AIGeneratorPage: React.FC<AIGeneratorPageProps> = ({
             units={activeMatrixData.units}
             summary={activeMatrixData.summary}
             aiInstruction={activeMatrixData.aiInstruction}
+            defaultScore={activeMatrixData.defaultScore}
             courses={courses}
             chapters={chapters}
             clos={clos}

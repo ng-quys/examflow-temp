@@ -62,6 +62,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   // Toggle between Matrix Builder and Step-by-Step Wizard for Exams
   const [examMode, setExamMode] = useState<'matrix' | 'wizard'>('matrix');
 
+  // Pre-selected exam title when opening Create Session from Exam Management
+  const [sessionPresetExamTitle, setSessionPresetExamTitle] = useState<string | null>(null);
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
@@ -189,14 +192,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                   onNavigateTab={handleTabChange}
                   onOpenAIGenerator={handleOpenAIGenerator}
                   onCreateExam={handleOpenCreateExam}
-                  onCreateSession={() => showToast('Mở trình tạo Ca thi mới')}
+                  onCreateSession={() => {
+                    setActiveTab('exam-sessions');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                 />
               ) : (
                 <ActiveDashboard
                   onNavigateTab={handleTabChange}
                   onOpenAIGenerator={handleOpenAIGenerator}
                   onCreateExam={handleOpenCreateExam}
-                  onCreateSession={() => showToast('Mở trình tạo Ca thi mới')}
+                  onCreateSession={() => {
+                    setActiveTab('exam-sessions');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   onViewExamDetail={(title) => showToast(`Chi tiết kỳ thi: ${title}`)}
                   onViewStudentDetail={(name) => showToast(`Xem bài làm của sinh viên: ${name}`)}
                 />
@@ -281,6 +290,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
               onUpdateQuestions={setQuestions}
               onNavigateToWizard={() => setExamMode('wizard')}
               onCreateSessionFromExam={(examTitle) => {
+                setSessionPresetExamTitle(examTitle);
                 showToast(`Đã chọn đề "${examTitle}" để mở ca thi`);
                 setActiveTab('exam-sessions');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -293,6 +303,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
           {activeTab === 'exam-sessions' && (
             <ExamSessionsPage
               courses={courses}
+              initialExamTitle={sessionPresetExamTitle}
+              onClearInitialExam={() => setSessionPresetExamTitle(null)}
               onShowToast={showToast}
             />
           )}

@@ -77,10 +77,6 @@ export const QuestionBankCard: React.FC<QuestionBankCardProps> = ({
     ? `${chapter.code}: ${chapter.name}`
     : topicName || question.aiSuggestedMeta?.topicName || 'Chương chung';
 
-  // Format correct option letter & text
-  const correctLetter = String.fromCharCode(65 + question.correctIndex);
-  const correctOptionText = question.options[question.correctIndex] || '';
-
   // Start in-line editing
   const handleStartEdit = () => {
     setEditContent(question.content);
@@ -485,12 +481,12 @@ export const QuestionBankCard: React.FC<QuestionBankCardProps> = ({
 
               {/* Blockquote Giải thích chi tiết */}
               {question.explanation && (
-                <blockquote className="my-2 p-3.5 pl-4 pr-3.5 mr-2 bg-slate-50 border-l-4 border-[#e75d0c] rounded-r-lg border-y border-r border-slate-200/60 shadow-2xs">
-                  <div className="flex items-center gap-1.5 font-bold italic text-slate-800 text-xs sm:text-[13px] mb-1">
-                    <span className="text-[#e75d0c] not-italic">💡</span>
-                    <span>Giải thích chi tiết:</span>
+                <blockquote className="my-2 p-3.5 pl-4 pr-3.5 bg-amber-50/40 border-l-4 border-amber-500 rounded-r-lg border-y border-r border-slate-200/60 shadow-2xs">
+                  <div className="flex items-center gap-1.5 font-semibold italic text-amber-900 text-sm mb-1">
+                    <span className="not-italic">💡</span>
+                    <span>Lưu ý / Giải thích chi tiết:</span>
                   </div>
-                  <p className="text-slate-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line italic">
+                  <p className="italic text-slate-700 text-sm leading-relaxed whitespace-pre-line">
                     {question.explanation}
                   </p>
                 </blockquote>
@@ -502,23 +498,11 @@ export const QuestionBankCard: React.FC<QuestionBankCardProps> = ({
           {/* 4. FOOTER THẺ CÂU HỎI                                                    */}
           {/* ========================================================================= */}
           <div className="pt-1.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            {/* Góc trái: Ngày cập nhật + Nhãn tóm tắt đáp án đúng nhỏ gọn */}
+            {/* Góc trái: Ngày cập nhật */}
             <div className="flex items-center flex-wrap gap-2 text-[11px] min-w-0">
               <span className="text-slate-400 shrink-0">
                 Cập nhật: {question.updatedAt}
               </span>
-
-              <span className="text-slate-300 hidden sm:inline">•</span>
-
-              {/* Nhãn tóm tắt đáp án đúng nhỏ gọn */}
-              <div
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200/90 font-medium text-[11px] max-w-full sm:max-w-md truncate"
-                title={`Đáp án đúng: [${correctLetter}] ${correctOptionText}`}
-              >
-                <span className="font-bold text-emerald-950 shrink-0">Đáp án đúng:</span>
-                <span className="font-bold text-emerald-700 shrink-0">[{correctLetter}]</span>
-                <span className="truncate text-emerald-900">{correctOptionText}</span>
-              </div>
             </div>
 
             {/* Góc phải: Chỉ giữ lại 2 nút chức năng: [✏️ Sửa] và [🗑 Xóa] */}

@@ -304,7 +304,6 @@ export const ExamManagementPage: React.FC<ExamManagementPageProps> = ({
                 <th className="py-3 px-4 sm:px-6">Tên đề thi & Cấu trúc</th>
                 <th className="py-3 px-3">Học phần</th>
                 <th className="py-3 px-3 text-center">Mã đề hoán vị</th>
-                <th className="py-3 px-3 text-center">Thời lượng</th>
                 <th className="py-3 px-3">Trạng thái</th>
                 <th className="py-3 px-3">Ngày thi</th>
                 <th className="py-3 px-4 sm:px-6 text-right">Xuất file & Thao tác</th>
@@ -313,7 +312,7 @@ export const ExamManagementPage: React.FC<ExamManagementPageProps> = ({
             <tbody className="divide-y divide-slate-100 text-xs">
               {filteredExams.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                  <td colSpan={6} className="py-12 text-center text-slate-400 text-xs">
                     <p>Không tìm thấy đề thi nào phù hợp với bộ lọc hiện tại.</p>
                     <button
                       type="button"
@@ -366,14 +365,6 @@ export const ExamManagementPage: React.FC<ExamManagementPageProps> = ({
                         <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">102</span>
                         <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">103</span>
                         <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">104</span>
-                      </div>
-                    </td>
-
-                    {/* Thời lượng */}
-                    <td className="py-3.5 px-3 text-center font-medium text-slate-600">
-                      <div className="inline-flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-slate-400" />
-                        <span>{exam.durationMinutes} phút</span>
                       </div>
                     </td>
 

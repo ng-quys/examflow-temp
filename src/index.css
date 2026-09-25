@@ -208,3 +208,54 @@ body * {
 .app-border-subtle {
   border-color: var(--border-subtle) !important;
 }
+
+/* ========================================================================= */
+/* CHUẨN IN ẤN BẢN THI A4 (PRINT STYLES FOR PDF / EXAM)                      */
+/* ========================================================================= */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Times New Roman', Times, serif, 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Ẩn các thành phần điều hướng, header, footer, tabs của web khi in */
+  nav,
+  header,
+  aside,
+  button,
+  .no-print,
+  .theme-switcher-container,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  /* Hiển thị vùng in ấn chuyên dụng */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Tùy chỉnh phân trang A4 */
+  @page {
+    size: A4 portrait;
+    margin: 18mm 15mm 18mm 15mm;
+  }
+
+  .print-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
